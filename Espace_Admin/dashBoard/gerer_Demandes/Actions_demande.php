@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../../connection.php';
+require_once '../../../dataBase/connection.php';
 
 // Vérifier l'authentification admin
 if (!isset($_SESSION['admin_name'])) {
