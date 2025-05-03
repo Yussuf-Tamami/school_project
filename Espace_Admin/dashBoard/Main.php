@@ -23,9 +23,8 @@ $num_enseignants = $num_enseignants_query->fetchColumn();
 
 $num_demandes_query = $dba->query('SELECT COUNT(id_demande) FROM demandes WHERE status = "waiting";');
 $num_demandes = $num_demandes_query->fetchColumn();
-
-
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -34,10 +33,10 @@ $num_demandes = $num_demandes_query->fetchColumn();
   <title>Admin Dashboard</title>
   <style>
     :root {
-      --primary: #4361ee;
-      --primary-dark: #3a56d4;
-      --secondary: #3f37c9;
-      --accent: #4895ef;
+      --primary:rgb(45, 67, 168);
+      --primary-dark:rgb(45, 75, 172);
+      --secondary:rgb(50, 76, 169);
+      --accent:rgb(51, 112, 204);
       --danger: #f72585;
       --success: #4cc9f0;
       --warning: #f8961e;
@@ -63,202 +62,31 @@ $num_demandes = $num_demandes_query->fetchColumn();
       display: flex;
     }
 
-    /* ========== Sidebar ========== */
-    .sidebar {
-      width: var(--sidebar-collapsed);
-      height: 100vh;
-      background: linear-gradient(180deg, var(--primary), var(--secondary));
-      color: white;
-      transition: all var(--transition-speed) ease;
-      position: fixed;
-      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
-      z-index: 100;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .sidebar:hover {
-      width: var(--sidebar-width);
-    }
-
-    .sidebar-header {
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      height: 70px;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .logo-icon {
-      font-size: 24px;
-      min-width: 40px;
-    }
-
-    .logo-text {
-      font-size: 18px;
-      font-weight: 600;
-      white-space: nowrap;
-      opacity: 0;
-      transition: opacity var(--transition-speed);
-    }
-
-    .sidebar:hover .logo-text {
-      opacity: 1;
-    }
-
-    .sidebar-menu {
-      flex: 1;
-      padding: 20px 0;
-      overflow-y: auto;
-    }
-
-    .menu-title {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: 0 20px 10px;
-      margin-top: 20px;
-      white-space: nowrap;
-      opacity: 0;
-      transition: opacity var(--transition-speed);
-    }
-
-    .sidebar:hover .menu-title {
-      opacity: 1;
-    }
-
-    .menu-item {
-      display: flex;
-      align-items: center;
-      padding: 12px 20px;
-      color: white;
-      text-decoration: none;
-      border-left: 3px solid transparent;
-      transition: all 0.2s ease;
-      margin: 5px 0;
-      white-space: nowrap;
-    }
-
-    .menu-item:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-left-color: white;
-    }
-
-    .menu-item.active {
-      background: rgba(255, 255, 255, 0.2);
-      border-left-color: white;
-    }
-
-    .menu-icon {
-      font-size: 20px;
-      min-width: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .menu-text {
-      opacity: 0;
-      transition: opacity var(--transition-speed);
-    }
-
-    .sidebar:hover .menu-text {
-      opacity: 1;
-    }
-
-    .menu-badge {
-      margin-left: auto;
-      background: var(--danger);
-      color: white;
-      font-size: 12px;
-      padding: 2px 8px;
-      border-radius: 10px;
-      display: none;
-    }
-
-    .sidebar-footer {
-      padding: 20px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-
-    .user-info {
-      opacity: 0;
-      transition: opacity var(--transition-speed);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .sidebar:hover .user-info {
-      opacity: 1;
-    }
-
-    .user-name {
-      font-weight: 500;
-      font-size: 14px;
-    }
-
-    .user-role {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    .logout-btn {
-      background: none;
-      border: none;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-      padding: 10px;
-      margin-top: 15px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .logout-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
     /* ========== Main Content ========== */
+    .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-profile span {
+            font-weight: 500;
+        }
     .main {
       flex: 1;
-      margin-left: var(--sidebar-collapsed);
+      margin-left:  var(--sidebar-width);
       transition: margin-left var(--transition-speed);
       padding: 20px;
     }
 
-    .sidebar:hover ~ .main {
-      margin-left: var(--sidebar-width);
-    }
+ 
 
     .header {
       display: flex;
@@ -364,7 +192,6 @@ $num_demandes = $num_demandes_query->fetchColumn();
       color: var(--dark);
     }
 
-
     /* ========== Stats & Notifications ========== */
     .stats-notifs {
       display: grid;
@@ -414,8 +241,6 @@ $num_demandes = $num_demandes_query->fetchColumn();
       color: var(--dark);
     }
 
-
-
     /* Responsive adjustments */
     @media (max-width: 992px) {
       .stats-notifs {
@@ -424,19 +249,7 @@ $num_demandes = $num_demandes_query->fetchColumn();
     }
 
     @media (max-width: 768px) {
-      .sidebar {
-        width: 0;
-      }
-      
-      .sidebar:hover {
-        width: var(--sidebar-width);
-      }
-      
       .main {
-        margin-left: 0;
-      }
-      
-      .sidebar:hover ~ .main {
         margin-left: 0;
       }
       
@@ -454,66 +267,7 @@ $num_demandes = $num_demandes_query->fetchColumn();
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <div class="logo">
-        <div class="logo-icon">
-          <i class="fas fa-university"></i>
-        </div>
-        <div class="logo-text">Admin Panel</div>
-      </div>
-    </div>
-    
-    <div class="sidebar-menu">
-      <div class="menu-title">Main</div>
-      <a href="./Main.php" class="menu-item active">
-        <div class="menu-icon">
-          <i class="fas fa-tachometer-alt"></i>
-        </div>
-        <div class="menu-text">Dashboard</div>
-      </a>
-      
-      <div class="menu-title">Management</div>
-      <a href="./gerer_Filieres/filieres.php" class="menu-item">
-        <div class="menu-icon">
-          <i class="fas fa-layer-group"></i>
-        </div>
-        <div class="menu-text">Filières</div>
-      </a>
-      <a href="./gerer_Enseignants/enseignants.php" class="menu-item">
-        <div class="menu-icon">
-          <i class="fas fa-chalkboard-teacher"></i>
-        </div>
-        <div class="menu-text">Enseignants</div>
-      </a>
-      <a href="./gerer_Demandes/Demandes.php" class="menu-item">
-        <div class="menu-icon">
-          <i class="fas fa-envelope"></i>
-        </div>
-        <div class="menu-text">Demandes</div>
-        <div class="menu-badge">3</div>
-      </a>
-    </div>
-    
-    <div class="sidebar-footer">
-      <div class="user-profile">
-        <div class="user-avatar">
-          <i class="fas fa-user-circle"></i>
-        </div>
-        <div class="user-info">
-          <a href="./pageAccount.php">
-          <div class="user-name"><?php echo htmlspecialchars($admin_name); ?></div>
-          <div class="user-role">Administrator</div>
-        </a>
-        </div>
-      </div>
-      
-        <button type="submit" name="logout" class="logout-btn">
-          <i class="fas fa-sign-out-alt"></i>
-          <a href="../../logOut/logOut.php"></a>
-        </button>
-    </div>
-  </div>
+  <?php include './sidebar.php'; ?>
 
   <div class="main">
     <div class="header">
@@ -521,10 +275,11 @@ $num_demandes = $num_demandes_query->fetchColumn();
         <h1>Tableau de bord Administrateur</h1>
         <p>Bienvenue sur votre espace d'administration</p>
       </div>
-      <div class="search-bar">
-        <i class="fas fa-search"></i>
-        <input type="text" placeholder="Rechercher...">
-      </div>
+      <div class="user-profile">
+                    <a href="pageAccount.php">
+                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($admin_name) ?>&background=random" alt="Admin"></a>
+                    <span><?php echo htmlspecialchars($admin_name); ?></span>
+                </div>
     </div>
     
     <div class="card-container">
@@ -538,7 +293,6 @@ $num_demandes = $num_demandes_query->fetchColumn();
             <i class="fas fa-layer-group"></i>
           </div>
         </div>
-
       </div>
       
       <div class="card">
@@ -563,7 +317,6 @@ $num_demandes = $num_demandes_query->fetchColumn();
             <i class="fas fa-users"></i>
           </div>
         </div>
-
       </div>
       
       <div class="card">
@@ -576,7 +329,6 @@ $num_demandes = $num_demandes_query->fetchColumn();
             <i class="fas fa-envelope"></i>
           </div>
         </div>
-
       </div>
     </div>
     
@@ -609,7 +361,7 @@ $num_demandes = $num_demandes_query->fetchColumn();
           <span class="stat-value"><?php echo htmlspecialchars($num_demandes); ?></span>
         </div>
       </div>
-      
-     
+    </div>
+  </div>
 </body>
 </html>
