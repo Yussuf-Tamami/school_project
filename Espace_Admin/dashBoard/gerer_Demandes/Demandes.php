@@ -2,382 +2,671 @@
 session_start();
 require_once '../../../dataBase/connection.php';
 
-// Verify admin authentication
 if (!isset($_SESSION['admin_name'])) {
     header('Location: ../../logIn/logIn.php');
     exit;
 }
+
 $admin_name = $_SESSION['admin_name'];
 $admin_email = $_SESSION['admin_email'];
-// Fetch all teacher requests grouped by filière
-$teacherRequests = [];
-$studentRequests = [];
+
+// Filter variables
+$selected_teacher_filiere = $_GET['teacher_filiere'] ?? '';
+$selected_teacher_matiere = $_GET['matiere'] ?? '';
+$selected_student_filiere = $_GET['student_filiere'] ?? '';
 
 try {
-    // Get teacher requests
-    $stmt = $dba->prepare("
-        SELECT d.*, f.nom_filiere 
+    // Get all filières
+    $stmt = $dba->prepare("SELECT id_filiere, nom_filiere FROM filieres ORDER BY nom_filiere");
+    $stmt->execute();
+    $filieres = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Get matières if filière is selected
+    $teacher_matieres = [];
+    if ($selected_teacher_filiere) {
+        $stmt = $dba->prepare("SELECT id_matiere, nom_matiere FROM matieres WHERE id_filiere = ? ORDER BY nom_matiere");
+        $stmt->execute([$selected_teacher_filiere]);
+        $teacher_matieres = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Teacher requests query
+    $teacherQuery = "
+        SELECT d.*, f.nom_filiere, m.nom_matiere 
         FROM demandes d
         JOIN filieres f ON d.id_filiere_demandé = f.id_filiere
+        LEFT JOIN matieres m ON d.id_matiere_demandé = m.id_matiere
         WHERE d.identite = 'enseignant' AND d.status = 'waiting'
-        ORDER BY f.nom_filiere
-    ");
-    $stmt->execute();
+    ";
+
+    $teacher_params = [];
+    if ($selected_teacher_filiere) {
+        $teacherQuery .= " AND d.id_filiere_demandé = ?";
+        $teacher_params[] = $selected_teacher_filiere;
+    }
+    if ($selected_teacher_matiere) {
+        $teacherQuery .= " AND d.id_matiere_demandé = ?";
+        $teacher_params[] = $selected_teacher_matiere;
+    }
+
+    $teacherQuery .= " ORDER BY f.nom_filiere, m.nom_matiere";
+    $stmt = $dba->prepare($teacherQuery);
+    $stmt->execute($teacher_params);
     $teacherRequests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Get student requests (corrected query)
-    $stmt = $dba->prepare("
+    // Student requests query
+    $studentQuery = "
         SELECT d.*, f.nom_filiere 
         FROM demandes d
         JOIN filieres f ON d.id_filiere_demandé = f.id_filiere
         WHERE d.identite = 'etudiant' AND d.status = 'waiting'
-        ORDER BY f.nom_filiere, note desc
-    ");
-    $stmt->execute();
+    ";
+
+    $student_params = [];
+    if ($selected_student_filiere) {
+        $studentQuery .= " AND d.id_filiere_demandé = ?";
+        $student_params[] = $selected_student_filiere;
+    }
+
+    $studentQuery .= " ORDER BY f.nom_filiere, note desc";
+    $stmt = $dba->prepare($studentQuery);
+    $stmt->execute($student_params);
     $studentRequests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
     $error = "Database error: " . $e->getMessage();
 }
-
-if(isset($_POST['logout'])){
-    session_unset();
-    session_destroy();
-    header('Location: ../../logIn/logIn.php');
-    exit;
-}
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tableau de Bord Admin</title>
+    <title>Admin Dashboard - Demandes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --primary: #4361ee;
+            --primary-light: #3f37c9;
+            --secondary: #3a0ca3;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --info: #4895ef;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
             margin: 0;
-            padding: 20px;
-            background-color:rgba(255, 245, 180, 0.64);
+            padding: 0;
+            box-sizing: border-box;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .section {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-        h1, h2 {
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
             color: #333;
+            line-height: 1.6;
         }
-        h2 {
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            margin-top: 30px;
-        }
-        .filiere-group {
-            margin-bottom: 25px;
-        }
-        .filiere-title {
-            background-color: #f0f7ff;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-        tr:hover {
-            background-color: #f9f9f9;
-        }
-        .action-btns {
+
+        .dashboard {
             display: flex;
-            gap: 5px;
+            min-height: 100vh;
         }
-        .action-btn {
-            padding: 5px 10px;
-            border-radius: 4px;
-            text-decoration: none;
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, var(--dark), var(--secondary));
             color: white;
-            font-size: 14px;
-            border: none;
-            cursor: pointer;
+            padding: 20px 0;
+            transition: var(--transition);
+            position: fixed;
+            height: 100%;
+            box-shadow: var(--box-shadow);
+            z-index: 100;
         }
-        .accept-btn {
-            background-color: #4CAF50;
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .reject-btn {
-            background-color: #f44336;
+
+        .sidebar-header h3 {
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .view-btn {
-            background-color: #2196F3;
+
+        .sidebar-header h3 i {
+            font-size: 1.5rem;
         }
-        .no-requests {
-            color: #666;
-            font-style: italic;
-            padding: 20px;
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 3px solid var(--success);
+        }
+
+        .sidebar-menu a i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+            width: 20px;
             text-align: center;
         }
 
-        .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      width: 60px;
-      background-color: #2c3e50;
-      color: white;
-      transition: width 0.3s;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .sidebar:hover {
-      width: 200px;
-    }
-    .sidebar nav {
-      display: flex;
-      flex-direction: column;
-      padding: 10px 0;
-    }
-    .sidebar nav a {
-      color: white;
-      text-decoration: none;
-      padding: 12px 10px;
-      margin-bottom: 5px;
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      transition: background 0.3s;
-      white-space: nowrap;
-    }
-    .sidebar nav a:hover {
-      background-color: #34495e;
-    }
-    .sidebar nav i {
-      margin: 0 10px;
-      font-size: 18px;
-      min-width: 20px;
-      text-align: center;
-    }
-    .sidebar nav span {
-      opacity: 0;
-      transition: opacity 0.3s ease-in-out;
-    }
-    .sidebar:hover nav span {
-      opacity: 1;
-    }
+        .logout-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
 
-    .logout {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 60px;
-  width: 100%;
-  margin-bottom: 20px;
-  position: absolute;
-  left: 27px;
-  bottom: 5px;
-}
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
 
-.logout form {
-  width: 100%;
-}
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 30px;
+        }
 
-.logout-btn {
-  width: 100%;
-  background: none;
-  border: none;
-  color: #ecf0f1;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 10px 0;
-  transition: all 0.3s ease;
-}
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
 
+        .header h1 {
+            color: var(--dark);
+            font-weight: 600;
+        }
 
-.logout-btn:hover{
-  background-color: #fff;
-  border-radius: 6px;
-  color:rgba(181, 0, 0, 0.84);
-}
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-.logout-btn i {
-  font-size: 18px;
-}
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
 
-.logout-btn span {
-  margin-left: 10px;
-  opacity: 0;
-  white-space: nowrap;
-  transition: opacity 0.3s ease;
-}
+        .user-profile span {
+            font-weight: 500;
+        }
 
-.sidebar:hover .logout-btn span {
-  opacity: 1;
-}
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
 
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 25px;
-    border-radius: 5px;
-    color: white;
-    z-index: 1000;
-    animation: slideIn 0.5s, fadeOut 0.5s 2.5s forwards;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
 
-.notification.success {
-    background-color: #4CAF50;
-}
+        .card-header h2 {
+            color: var(--dark);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
 
-.notification.error {
-    background-color: #f44336;
-}
+        /* Filter Styles */
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
 
-@keyframes slideIn {
-    from { right: -300px; opacity: 0; }
-    to { right: 20px; opacity: 1; }
-}
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
 
-@keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
-}
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
 
+        .filter-select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            background: white;
+            font-family: 'Poppins', sans-serif;
+            transition: var(--transition);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+
+        /* Table Styles */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--dark);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Badge Styles */
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-waiting {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            text-decoration: none;
+            gap: 5px;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.75rem;
+        }
+
+        .btn-view {
+            background-color: var(--info);
+            color: white;
+        }
+
+        .btn-view:hover {
+            background-color: #3a7bd5;
+        }
+
+        .btn-accept {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-accept:hover {
+            background-color: #3aa8d5;
+        }
+
+        .btn-reject {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background-color: #d51a6a;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #dee2e6;
+            margin-bottom: 15px;
+        }
+
+        .empty-state h3 {
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #6c757d;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            color: white;
+            z-index: 1000;
+            animation: slideIn 0.5s, fadeOut 0.5s 2.5s forwards;
+            box-shadow: var(--box-shadow);
+        }
+
+        .notification.success {
+            background-color: var(--success);
+        }
+
+        .notification.error {
+            background-color: var(--danger);
+        }
+
+        @keyframes slideIn {
+            from { right: -300px; opacity: 0; }
+            to { right: 20px; opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
+            
+            .sidebar:hover {
+                width: 250px;
+            }
+            
+            .sidebar-menu a span {
+                display: none;
+            }
+            
+            .sidebar:hover .sidebar-menu a span {
+                display: inline;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+            
+            .sidebar:hover ~ .main-content {
+                margin-left: 250px;
+            }
+        }
     </style>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-
-<?php if (isset($_SESSION['notification'])): ?>
-    <div class="notification <?= $_SESSION['notification']['type'] ?>">
-        <?= $_SESSION['notification']['message'] ?>
-    </div>
-    <?php unset($_SESSION['notification']); ?>
-<?php endif; ?>
-
-<div class="sidebar">
-    <nav>
-      <a href="../Account.php"><i class="fas fa-user-circle"></i> <span><?php echo htmlspecialchars($admin_name); ?></span></a>
-      <br>
-      <a href="../gerer_Filieres/filieres.php"><i class="fas fa-layer-group"></i> <span>Filières</span></a>
-      <a href="../gerer_Enseignants/enseignants.php"><i class="fas fa-chalkboard-teacher"></i> <span>Enseignants</span></a>
-      <a href="Demandes.php"><i class="fas fa-envelope"></i> <span>Demandes</span></a>
-
-    </nav>
-    <div class="logout">
-      <form action="" method="post" >
-        <button type="submit" name="logout" class="logout-btn" ><i class="fas fa-sign-out-alt" ></i><span>Log out</span></button>
-      </form>
-    </div>
-  </div>
-
-    <div class="container">
-        <h1>Tableau de Bord Administrateur</h1>
-        
-        <!-- Teacher Requests Section -->
-        <div class="section">
-            <h2>Demandes d'Enseignants</h2>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-graduation-cap"></i> <span>SchoolAdmin</span></h3>
+            </div>
             
-            <?php if (empty($teacherRequests)): ?>
-                <p class="no-requests">Aucune demande d'enseignant en attente.</p>
-            <?php else: ?>
-                <!-- Group by Filière -->
-                <?php 
-                $groupedTeachers = [];
-                foreach ($teacherRequests as $request) {
-                    $groupedTeachers[$request['nom_filiere']][] = $request;
-                }
-                ?>
+            <nav class="sidebar-menu">
                 
-                <?php foreach ($groupedTeachers as $filiere => $requests): ?>
-                    <div class="filiere-group">
-                        <div class="filiere-title">Filière: <?= htmlspecialchars($filiere) ?></div>
+                <a href="../Main.php">
+                    <i class="fas fa-home"></i>
+                    <span>Acceuil</span>
+                </a>
+                <a href="../gerer_Filieres/filieres.php">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Filières</span>
+                </a>
+                <a href="../gerer_Enseignants/enseignants.php">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>Enseignants</span>
+                </a>
+                <a href="Demandes.php" class="active">
+                    <i class="fas fa-envelope"></i>
+                    <span>Demandes</span>
+                </a>
+                <a href="../Account.php">
+                    <i class="fas fa-user-circle"></i>
+                    <span><?php echo htmlspecialchars($admin_name); ?></span>
+                </a>
+            </nav>
+            
+            <button class="logout-btn" onclick="window.location.href='../../../logOut/logOut.php'">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Déconnexion</span>
+            </button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <?php if (isset($_SESSION['notification'])): ?>
+                <div class="notification <?= $_SESSION['notification']['type'] ?>">
+                    <?= $_SESSION['notification']['message'] ?>
+                </div>
+                <?php unset($_SESSION['notification']); ?>
+            <?php endif; ?>
+
+            <div class="header">
+                <h1>Gestion des Demandes</h1>
+                <div class="user-profile">
+                    <a href="../pageAccount.php">
+                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($admin_name) ?>&background=random" alt="Admin"></a>
+                    <span><?php echo htmlspecialchars($admin_name); ?></span>
+                </div>
+            </div>
+
+            <!-- Teacher Requests Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-chalkboard-teacher mr-2"></i> Demandes des Enseignants</h2>
+                </div>
+                
+                <form action="Demandes.php" method="GET">
+    <div class="filter-group">
+        <label for="teacher_filiere">Filière</label>
+        <select name="teacher_filiere" id="teacher_filiere" class="filter-select" onchange="this.form.submit()" required>
+            <option value="" disabled selected>Sélectionner une filière</option>
+            <?php foreach ($filieres as $filiere): ?>
+                <option value="<?= $filiere['id_filiere'] ?>" <?= $selected_teacher_filiere == $filiere['id_filiere'] ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($filiere['nom_filiere']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <?php if ($selected_teacher_filiere): ?>
+    <div class="filter-group">
+        <label for="teacher_matiere">Matière</label>
+        <select name="matiere" id="teacher_matiere" class="filter-select" onchange="this.form.submit()">
+            <option value="" disabled selected>Sélectionner une matière</option>
+            <?php foreach ($teacher_matieres as $matiere): ?>
+                <option value="<?= $matiere['id_matiere'] ?>" <?= $selected_teacher_matiere == $matiere['id_matiere'] ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($matiere['nom_matiere']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+    <?php endif; ?>
+</form>
+
+                <?php if (!$selected_teacher_filiere): ?>
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>Aucune filière sélectionnée</h3>
+                        <p>Veuillez sélectionner une filière pour afficher les demandes</p>
+                    </div>
+                <?php elseif (empty($teacherRequests)): ?>
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Aucune demande disponible</h3>
+                        <p>Il n'y a pas de demandes d'enseignants pour les critères sélectionnés</p>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Nom</th>
                                     <th>Prénom</th>
                                     <th>Email</th>
-                                    <th>Specialite</th>
-                                    <th>Date Demande</th>
+                                    <th>Spécialité</th>
+                                    <th>Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($requests as $request): ?>
+                                <?php foreach ($teacherRequests as $request): ?>
                                 <tr>
                                     <td><?= htmlspecialchars($request['nom']) ?></td>
                                     <td><?= htmlspecialchars($request['prenom']) ?></td>
                                     <td><?= htmlspecialchars($request['email']) ?></td>
-                                    <td><?= htmlspecialchars($request['nom_filiere']) ?></td>
+                                    <td>
+                                        <?= htmlspecialchars($request['nom_filiere']) ?>
+                                        <?php if ($request['nom_matiere']): ?>
+                                            <br><small class="text-muted"><?= htmlspecialchars($request['nom_matiere']) ?></small>
+                                        <?php endif; ?>
+                                    </td>
                                     <td><?= isset($request['date_demande']) ? date('d/m/Y H:i', strtotime($request['date_demande'])) : 'N/A' ?></td>
                                     <td>
-    <div class="action-btns">
-        <a href="view_request.php?id_demande=<?= htmlspecialchars($request['id_demande']) ?>&type=<?= htmlspecialchars($request['identite']) ?>" class="action-btn view-btn">Voir</a>
-        <form action="Actions_demande.php" method="post" style="display: inline;">
-            <input type="hidden" name="id" value="<?= $request['id_demande'] ?>">
-            <input type="hidden" name="type" value="enseignant">
-            <button type="submit" name="action" value="accept" class="action-btn accept-btn">Accepter</button>
-        </form>
-        <form action="Actions_demande.php" method="post" style="display: inline;">
-            <input type="hidden" name="id" value="<?= $request['id_demande'] ?>">
-            <input type="hidden" name="type" value="enseignant">
-            <button type="submit" name="action" value="reject" class="action-btn reject-btn">Refuser</button>
-        </form>
-    </div>
-</td>
+                                        <div class="btn-group">
+                                            <a href="view_request.php?id_demande=<?= htmlspecialchars($request['id_demande']) ?>&type=<?= htmlspecialchars($request['identite']) ?>" class="btn btn-view btn-sm">
+                                                <i class="fas fa-eye"></i> Voir
+                                            </a>
+                                            <form action="Actions_demande.php" method="post" style="display: inline;">
+                                                <input type="hidden" name="id" value="<?= $request['id_demande'] ?>">
+                                                <input type="hidden" name="type" value="enseignant">
+                                                <button type="submit" name="action" value="accept" class="btn btn-accept btn-sm">
+                                                    <i class="fas fa-check"></i> Accepter
+                                                </button>
+                                            </form>
+                                            <form action="Actions_demande.php" method="post" style="display: inline;">
+                                                <input type="hidden" name="id" value="<?= $request['id_demande'] ?>">
+                                                <input type="hidden" name="type" value="enseignant">
+                                                <button type="submit" name="action" value="reject" class="btn btn-reject btn-sm">
+                                                    <i class="fas fa-times"></i> Refuser
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
                     </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
-        
-        <!-- Student Requests Section -->
-        <div class="section">
-            <h2>Demandes d'Étudiants</h2>
-            
-            <?php if (empty($studentRequests)): ?>
-                <p class="no-requests">Aucune demande d'étudiant en attente.</p>
-            <?php else: ?>
-                <!-- Group by Filière -->
-                <?php 
-                $groupedStudents = [];
-                foreach ($studentRequests as $request) {
-                    $groupedStudents[$request['nom_filiere']][] = $request;
-                }
-                ?>
+                <?php endif; ?>
+            </div>
+
+            <!-- Student Requests Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-user-graduate mr-2"></i> Demandes des Étudiants</h2>
+                </div>
                 
-                <?php foreach ($groupedStudents as $filiere => $requests): ?>
-                    <div class="filiere-group">
-                        <div class="filiere-title">Filière: <?= htmlspecialchars($filiere) ?></div>
+                <div class="filter-section">
+                  <form action="" method="get">
+                    <div class="filter-group">
+                        <label for="student_filiere">Filière</label>
+                        <select name="student_filiere" id="student_filiere" class="filter-select" onchange="this.form.submit()" required>
+                            <option value="" disabled selected>Sélectionner une filière</option>
+                            <?php foreach ($filieres as $filiere): ?>
+                                <option value="<?= $filiere['id_filiere'] ?>" <?= $selected_student_filiere == $filiere['id_filiere'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($filiere['nom_filiere']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                  </form>
+                </div>
+                
+                <?php if (!$selected_student_filiere): ?>
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>Aucune filière sélectionnée</h3>
+                        <p>Veuillez sélectionner une filière pour afficher les demandes</p>
+                    </div>
+                <?php elseif (empty($studentRequests)): ?>
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Aucune demande disponible</h3>
+                        <p>Il n'y a pas de demandes d'étudiants pour la filière sélectionnée</p>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
                         <table>
                             <thead>
                                 <tr>
@@ -385,12 +674,12 @@ if(isset($_POST['logout'])){
                                     <th>Prénom</th>
                                     <th>Email</th>
                                     <th>Note</th>
-                                    <th>Date Demande</th>
+                                    <th>Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($requests as $request): ?>
+                                <?php foreach ($studentRequests as $request): ?>
                                 <tr>
                                     <td><?= htmlspecialchars($request['nom']) ?></td>
                                     <td><?= htmlspecialchars($request['prenom']) ?></td>
@@ -398,28 +687,35 @@ if(isset($_POST['logout'])){
                                     <td><?= htmlspecialchars($request['note']) ?></td>
                                     <td><?= isset($request['date_demande']) ? date('d/m/Y H:i', strtotime($request['date_demande'])) : 'N/A' ?></td>
                                     <td>
-    <div class="action-btns">
-        <a href="view_request.php?id_demande=<?= htmlspecialchars($request['id_demande']) ?>&type=<?= htmlspecialchars($request['identite']) ?>" class="action-btn view-btn">Voir</a>
-        <form action="Actions_demande.php" method="post" style="display: inline;">
-            <input type="hidden" name="id" value="<?= $request['id_demande'] ?>">
-            <input type="hidden" name="type" value="etudiant">
-            <button type="submit" name="action" value="accept" class="action-btn accept-btn">Accepter</button>
-        </form>
-        <form action="Actions_demande.php" method="post" style="display: inline;">
-            <input type="hidden" name="id" value="<?= $request['id_demande'] ?>">
-            <input type="hidden" name="type" value="etudiant">
-            <button type="submit" name="action" value="reject" class="action-btn reject-btn">Refuser</button>
-        </form>
-    </div>
-</td>
+                                        <div class="btn-group">
+                                            <a href="view_request.php?id_demande=<?= htmlspecialchars($request['id_demande']) ?>&type=<?= htmlspecialchars($request['identite']) ?>" class="btn btn-view btn-sm">
+                                                <i class="fas fa-eye"></i> Voir
+                                            </a>
+                                            <form action="Actions_demande.php" method="post" style="display: inline;">
+                                                <input type="hidden" name="id" value="<?= $request['id_demande'] ?>">
+                                                <input type="hidden" name="type" value="etudiant">
+                                                <button type="submit" name="action" value="accept" class="btn btn-accept btn-sm">
+                                                    <i class="fas fa-check"></i> Accepter
+                                                </button>
+                                            </form>
+                                            <form action="Actions_demande.php" method="post" style="display: inline;">
+                                                <input type="hidden" name="id" value="<?= $request['id_demande'] ?>">
+                                                <input type="hidden" name="type" value="etudiant">
+                                                <button type="submit" name="action" value="reject" class="btn btn-reject btn-sm">
+                                                    <i class="fas fa-times"></i> Refuser
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
                     </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
+                <?php endif; ?>
+            </div>
+            <br>
+        </main>
     </div>
 </body>
 </html>
