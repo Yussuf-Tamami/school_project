@@ -76,102 +76,240 @@ try {
     <title>Gestion des Filières</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color:rgb(255, 244, 198);
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 30px;
-        }
-        .departement {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-        .departement-title {
-            background-color: #2c3e50;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .filiere {
-            margin-left: 20px;
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            border-left: 4px solid #3498db;
-        }
-        .filiere-title {
-            font-weight: bold;
-            color: #3498db;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .matiere {
-            margin-left: 20px;
-            padding: 10px;
-            background-color: #fff;
-            border-radius: 3px;
-            margin-bottom: 8px;
-            border: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .matiere-info {
-            flex: 1;
-        }
-        .matiere-actions {
-            display: flex;
-            gap: 10px;
-        }
-        .action-btn {
-            padding: 5px 10px;
-            border-radius: 4px;
-            text-decoration: none;
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-        }
-        .edit-btn {
-            background-color: #f39c12;
-        }
-        .edit-btn:hover {
-            background-color: #e67e22;
-        }
-        .add-btn {
-            background-color: #2ecc71;
-            padding: 8px 15px;
-        }
-        .add-btn:hover {
-            background-color: #27ae60;
-        }
-        .no-data {
-            color: #7f8c8d;
-            font-style: italic;
-            padding: 10px;
-        }
-    </style>
+
+*{
+    box-sizing: border-box;
+}
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    background-color: rgb(255, 244, 198);
+    display: flex;
+    min-height: 100vh;
+}
+
+.container {
+    flex: 1;
+    margin-left: 250px; /* Offset for the sidebar */
+    background-color: #f7f9fc;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+.departement {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.departement-title {
+    background-color: #2c3e50;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filiere {
+    margin-left: 20px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border-left: 4px solid #3498db;
+}
+
+.filiere-title {
+    font-weight: bold;
+    color: #3498db;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.matiere {
+    margin-left: 20px;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 3px;
+    margin-bottom: 8px;
+    border: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.matiere-info {
+    flex: 1;
+}
+
+.matiere-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.edit-btn {
+    background-color: #f39c12;
+}
+
+.edit-btn:hover {
+    background-color: #e67e22;
+}
+
+.add-btn {
+    background-color: #2ecc71;
+    padding: 8px 15px;
+}
+
+.add-btn:hover {
+    background-color: #27ae60;
+}
+
+.no-data {
+    color: #7f8c8d;
+    font-style: italic;
+    padding: 10px;
+}
+.sidebar {
+    width: 250px;
+    background: linear-gradient(180deg, #1b263b, #3a0ca3);
+    color: white;
+    padding: 20px 0;
+    transition: all 0.3s ease;
+    position: fixed;
+    height: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    margin: 0;
+    line-height: 1;
+}
+
+.sidebar-header {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h3 {
+    color: white;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar-header h3 i {
+    font-size: 1.5rem;
+}
+
+.sidebar-menu {
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-menu a:hover, 
+.sidebar-menu a.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-left: 3px solid #4cc9f0;
+}
+
+.sidebar-menu a i {
+    margin-right: 10px;
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.logout-btn {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+</style>
 </head>
 <body>
+
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <h3><i class="fas fa-graduation-cap"></i> <span>SchoolAdmin</span></h3>
+    </div>
+    
+    <nav class="sidebar-menu">
+        <a href="../Main.php" class="<?= basename($_SERVER['PHP_SELF']) == 'Main.php' ? 'active' : '' ?>">
+            <i class="fas fa-home"></i>
+            <span>Acceuil</span>
+        </a>
+        <a href="./filieres.php" class="<?= basename($_SERVER['PHP_SELF']) == 'filieres.php' ? 'active' : '' ?>">
+            <i class="fas fa-layer-group"></i>
+            <span>Filières</span>
+        </a>
+        <a href="../gerer_Enseignants/enseignants.php" class="<?= basename($_SERVER['PHP_SELF']) == 'enseignants.php' ? 'active' : '' ?>">
+            <i class="fas fa-chalkboard-teacher"></i>
+            <span>Enseignants</span>
+        </a>
+        <a href="../gerer_Demandes/Demandes.php" class="<?= basename($_SERVER['PHP_SELF']) == 'Demandes.php' ? 'active' : '' ?>">
+            <i class="fas fa-envelope"></i>
+            <span>Demandes</span>
+        </a>
+        <a href="../pageAccount.php" class="<?= basename($_SERVER['PHP_SELF']) == 'pageAccount.php' ? 'active' : '' ?>">
+            <i class="fas fa-user-circle"></i>
+            <span><?= htmlspecialchars($_SESSION['admin_name'] ?? 'Admin') ?></span>
+        </a>
+    </nav>
+    
+    <button class="logout-btn" onclick="window.location.href='../../../logOut/logOut.php'">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Déconnexion</span>
+    </button>
+</aside>
 
     <div class="container">
         <h1>Gestion des Filières et Matières</h1>
