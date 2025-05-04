@@ -25,8 +25,8 @@ $notifications = $stmt->fetchAll();
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f0f2f5;
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f6f9;
     }
     .sidebar {
       position: fixed;
@@ -40,36 +40,40 @@ $notifications = $stmt->fetchAll();
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     }
     .sidebar:hover {
-      width: 200px;
+      width: 220px;
+    }
+    .sidebar .logo {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .sidebar .logo img {
+      width: 40px;
+      border-radius: 50%;
     }
     .sidebar nav {
       display: flex;
       flex-direction: column;
-      padding: 10px 0;
-      gap: 8px;
+      padding: 20px 0;
+      gap: 15px;
     }
     .sidebar nav a {
       color: white;
       text-decoration: none;
-      padding: 12px 10px;
+      padding: 12px 20px;
       display: flex;
       align-items: center;
+      border-radius: 5px;
       transition: background 0.3s;
     }
     .sidebar nav a:hover {
       background-color: #2c3e50;
     }
     .sidebar nav i {
-      margin: 0 10px;
+      margin-right: 10px;
       font-size: 18px;
-      min-width: 20px;
-      text-align: center;
-      transition: transform 0.3s ease;
-    }
-    .sidebar nav a:hover i {
-      transform: scale(1.1);
     }
     .sidebar nav span {
       opacity: 0;
@@ -79,25 +83,14 @@ $notifications = $stmt->fetchAll();
     .sidebar:hover nav span {
       opacity: 1;
     }
-    .logout {
+    .sidebar .logout {
       padding: 15px;
       text-align: center;
     }
-    .logout a {
+    .sidebar .logout a {
       color: #ecf0f1;
       text-decoration: none;
       font-size: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .logout span {
-      opacity: 0;
-      transition: opacity 0.3s ease-in-out;
-      white-space: nowrap;
-    }
-    .sidebar:hover .logout span {
-      opacity: 1;
     }
     .main {
       margin-left: 60px;
@@ -105,7 +98,7 @@ $notifications = $stmt->fetchAll();
       transition: margin-left 0.3s;
     }
     .sidebar:hover ~ .main {
-      margin-left: 200px;
+      margin-left: 220px;
     }
     h1 {
       color: #2c3e50;
@@ -122,37 +115,66 @@ $notifications = $stmt->fetchAll();
       color: #2c3e50;
       text-decoration: none;
     }
+    .notifications {
+      margin-top: 20px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .header .user-info {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      color: #34495e;
+    }
+    .header .user-info img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 15px;
+    }
   </style>
-  <!-- had link kay importi icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
   <div class="sidebar">
+    <div class="logo">
+      <img src="../../logo.png" alt="Logo Ecole" />
+    </div>
     <nav>
       <a href="./Main.php"><i class="fas fa-home"></i> <span>Accueil</span></a>
       <a href="Notes/notes.php"><i class="fas fa-book"></i> <span>Mes Notes</span></a>
       <a href="#"><i class="fas fa-user"></i> <span>Mon Profil</span></a>
+      <a href="attestation.php" class="btn-attestation"><i class="fas fa-download"></i> <span>Télécharger Attestation</span></a>
     </nav>
     <div class="logout">
       <a href="../../logOut/logOut.php">Log out</a>
     </div>
   </div>
   <div class="main">
-    <h1>Bienvenue <?php echo $username;?> sur votre espace étudiant</h1>
+    <div class="header">
+      <h1>Bienvenue, <?php echo $username; ?>!</h1>
+      <div class="user-info">
+        <img src="../../logo.png" alt="User Avatar" />
+        <span><?php echo $filiere; ?></span>
+      </div>
+    </div>
     <p>Accédez à vos notes, cours et informations personnelles depuis ce tableau de bord.</p>
 
     <div>
       <h2><strong>Notifications:</strong></h2>
-        <div class="notifications">
-          <?php foreach ($notifications as $notif): ?>
-                <div class="notif-box">
-                <a href="voir_notification.php?id_notification= <?= $notif['id_notification'] ?>&id_etudiant=<?= $notif['id_etudiant'] ?>">
-                    <?= htmlspecialchars($notif['message']) ?>
-                </a>
-                </div>
-            <?php endforeach; ?>
-        </div>
-
+      <div class="notifications">
+        <?php foreach ($notifications as $notif): ?>
+          <div class="notif-box">
+            <a href="voir_notification.php?id_notification= <?= $notif['id_notification'] ?>&id_etudiant=<?= $notif['id_etudiant'] ?>">
+                <?= htmlspecialchars($notif['message']) ?>
+            </a>
+          </div>
+        <?php endforeach; ?>
+      </div>
     </div>
   </div>
 </body>

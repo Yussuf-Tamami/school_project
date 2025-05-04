@@ -1,6 +1,6 @@
 <?php
     session_start();
-    include '../../connection.php';
+    include '../../../dataBase/connection.php';
 
     if (!isset($_SESSION['nom_etudiant'])) {
         header("Location: ../Main.php");
