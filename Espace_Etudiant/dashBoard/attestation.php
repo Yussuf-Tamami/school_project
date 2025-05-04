@@ -5,7 +5,7 @@ require_once '../../dataBase/connection.php';
 
 
 if (!isset($_SESSION['id_etudiant'])) {
-    die("المرجو تسجيل الدخول");
+    die("errror ...");
 }
 
 $id = $_SESSION['id_etudiant'];
