@@ -82,7 +82,7 @@ try {
     font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: px;
 }
 
 .sidebar-header h3 i {

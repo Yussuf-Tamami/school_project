@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_devoir'])) {
     $notif_stmt->execute([$id_etudiant, $notification]);
 
     // Rafraîchir pour afficher nouvelles notes
-    header("Location: noter.php?id_etudiant=$id_etudiant&id_matiere=$id_matiere");
+    header("Location: noter_etudiant.php?id_etudiant=$id_etudiant&id_matiere=$id_matiere");
     exit;
 }
 ?>

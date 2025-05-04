@@ -78,6 +78,7 @@ try {
     <style>
 
 *{
+    padding: 0;
     box-sizing: border-box;
 }
 body {
@@ -196,14 +197,12 @@ h1 {
     width: 250px;
     background: linear-gradient(180deg, #1b263b, #3a0ca3);
     color: white;
-    padding: 20px 0;
+    padding: 2.8px 0px;
     transition: all 0.3s ease;
     position: fixed;
     height: 100%;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 100;
-    margin: 0;
-    line-height: 1;
+    line-height: 1.5;
 }
 
 .sidebar-header {
