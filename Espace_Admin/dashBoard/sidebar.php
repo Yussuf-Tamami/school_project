@@ -101,21 +101,21 @@ if (session_status() === PHP_SESSION_NONE) {
             <i class="fas fa-layer-group"></i>
             <span>Filières</span>
         </a>
-        <a href="gerer_Enseignants/enseignants.php" class="<?= basename($_SERVER['PHP_SELF']) == 'enseignants.php' ? 'active' : '' ?>">
+        <a href="/Espace_Admin/dashBoard/gerer_Enseignants/enseignants.php" class="<?= basename($_SERVER['PHP_SELF']) == 'enseignants.php' ? 'active' : '' ?>">
             <i class="fas fa-chalkboard-teacher"></i>
             <span>Enseignants</span>
         </a>
-        <a href="/gerer_Demandes/Demandes.php" class="<?= basename($_SERVER['PHP_SELF']) == 'Demandes.php' ? 'active' : '' ?>">
+        <a href="school_project/Espace_Admin/dashBoard/gerer_Demandes/Demandes.php" class="<?= basename($_SERVER['PHP_SELF']) == 'Demandes.php' ? 'active' : '' ?>">
             <i class="fas fa-envelope"></i>
             <span>Demandes</span>
         </a>
-        <a href="/Espace_Admin/dashBoard/pageAccount.php" class="<?= basename($_SERVER['PHP_SELF']) == 'Account.php' ? 'active' : '' ?>">
+        <a href="school_project/Espace_Admin/dashBoard/pageAccount.php" class="<?= basename($_SERVER['PHP_SELF']) == 'pageAccount.php' ? 'active' : '' ?>">
             <i class="fas fa-user-circle"></i>
             <span><?= htmlspecialchars($_SESSION['admin_name'] ?? 'Admin') ?></span>
         </a>
     </nav>
     
-    <button class="logout-btn" onclick="window.location.href='../../../logOut/logOut.php'">
+    <button class="logout-btn" onclick="window.location.href='/logOut/logOut.php'">
         <i class="fas fa-sign-out-alt"></i>
         <span>Déconnexion</span>
     </button>
