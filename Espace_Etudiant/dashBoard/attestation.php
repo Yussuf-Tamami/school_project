@@ -30,7 +30,7 @@ $pdf = new FPDF();
 $pdf->AddPage();
 
 // logo
-$pdf->Image('../../logo.png', 10, 5, 20); 
+$pdf->Image('../../Images/logo.png', 10, 5, 20); 
 $pdf->SetFont('Arial', 'B', 20);
 $pdf->Cell(0, 10, 'Attestation de Scolarite', 0, 1, 'C');
 $pdf->Ln(10);
