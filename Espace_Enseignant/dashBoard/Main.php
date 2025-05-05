@@ -398,9 +398,9 @@ $email_enseignant = htmlspecialchars($_SESSION['email_enseignant']) ?? 'unknown@
           </a>
         </li>
         <li class="nav-item">
-          <a href="#" class="nav-link">
+          <a href="./Statistiques.php" class="nav-link">
             <i class="fas fa-chalkboard"></i>
-            <span class="nav-text">Mes Cours</span>
+            <span class="nav-text">Statistiques</span>
           </a>
         </li>
       </ul>

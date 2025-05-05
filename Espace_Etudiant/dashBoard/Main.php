@@ -8,7 +8,8 @@ if (!isset($_SESSION['nom_etudiant']) || !isset($_SESSION['email_etudiant'])) {
 }
 
 $username = htmlspecialchars($_SESSION['nom_etudiant']);
-$filiere = htmlspecialchars($_SESSION['nom_filiere']);
+$id_filiere = $_SESSION['id_filiere'];
+$filiere = $_SESSION['nom_filiere'];
 $id_etudiant = $_SESSION['id_etudiant'];
 $sql = "SELECT * FROM notifications WHERE id_etudiant = ? AND vu = 0 ORDER BY date_notification DESC";
 $stmt = $dba->prepare($sql);
@@ -159,7 +160,7 @@ $notifications = $stmt->fetchAll();
       <h1>Bienvenue, <?php echo $username; ?>!</h1>
       <div class="user-info">
         <img src="../../logo.png" alt="User Avatar" />
-        <span><?php echo $filiere; ?></span>
+        <span><?php echo $filiere[0]; ?></span>
       </div>
     </div>
     <p>Accédez à vos notes, cours et informations personnelles depuis ce tableau de bord.</p>

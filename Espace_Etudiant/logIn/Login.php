@@ -15,7 +15,7 @@ if(isset($_POST['login'])) {  // Changé de 'submitted' à 'login'
         $email = $_POST['email'];
         $password_hashed = hash('sha256', $_POST['password']);
 
-        $query = $dba->prepare('SELECT id_etudiant, nom, prenom, password FROM etudiants WHERE email = ?');
+        $query = $dba->prepare('SELECT id_etudiant, nom, prenom, password, id_filiere FROM etudiants WHERE email = ?');
         $query->execute([$email]);
 
         $result = $query->fetch();
@@ -28,6 +28,7 @@ if(isset($_POST['login'])) {  // Changé de 'submitted' à 'login'
                 $_SESSION['email_etudiant'] = $email;
                 $query = $dba->prepare('SELECT nom_filiere FROM filieres WHERE id_filiere = ?');
                 $query->execute([$result['id_filiere']]);
+                $_SESSION['id_filiere'] = $result['id_filiere'];
                 $_SESSION['nom_filiere'] = $query->fetch();
                 header('Location: ../dashBoard/Main.php');
                 exit;
@@ -112,7 +113,7 @@ if (isset($_POST['signup'])) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Enseignant Login</title>
+  <title>Etudiant Login</title>
   <style>
     * {
       box-sizing: border-box;

@@ -84,7 +84,7 @@ try {
 body {
     font-family: 'Poppins', sans-serif;
     margin: 0;
-    background-color: rgb(255, 244, 198);
+    background-color: rgb(255, 233, 195);
     display: flex;
     min-height: 100vh;
 }
@@ -92,7 +92,7 @@ body {
 .container {
     flex: 1;
     margin-left: 250px; /* Offset for the sidebar */
-    background-color: #f7f9fc;
+    background-color:rgb(255, 233, 195);
     padding: 30px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
@@ -320,7 +320,7 @@ h1 {
         <?php foreach ($structure as $departement): ?>
             <div class="departement">
                 <div class="departement-title">
-                    <span><?= htmlspecialchars($departement['nom_departement']) ?></span>
+                    <span>Departement  <?= htmlspecialchars($departement['nom_departement']) ?></span>
                     <a href="add_filiere.php?id_departement=<?= htmlspecialchars($departement['id_departement'])?>" class="action-btn add-btn">
                         <i class="fas fa-plus"></i> Ajouter Filière
                     </a>
@@ -357,7 +357,7 @@ h1 {
                             <?php else: ?>
                                 <p class="no-data">Aucune matière dans cette filière</p>
                             <?php endif; ?>
-                        </div>
+                        </div><br>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <p class="no-data">Aucune filière dans ce département</p>

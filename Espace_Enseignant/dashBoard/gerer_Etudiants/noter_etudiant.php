@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_devoir'])) {
     $note = floatval($_POST['note_' . $devoir]);
     $date = date('Y-m-d');
 
-    // Vérifier si note existe déjà
+    // Verification si note deja existe 
     $check = $dba->prepare("SELECT * FROM evaluations WHERE id_etudiant = ? AND id_matiere = ? AND num_devoir = ?");
     $check->execute([$id_etudiant, $id_matiere, $devoir]);
 
@@ -53,13 +53,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_devoir'])) {
         $message = "<p class='success'>✅ Note enregistrée avec succès.</p>";
     }
 
-    // Ajouter notification
+    // Ajouter notification pour l'etudiant
     $notification = "La note du devoir $devoir de la matière $nom_matiere a été ajoutée/modifiée.";
     $notif_stmt = $dba->prepare("INSERT INTO notifications (id_etudiant, message) 
                                  VALUES (?, ?)");
     $notif_stmt->execute([$id_etudiant, $notification]);
 
-    // Rafraîchir pour afficher nouvelles notes
+    // refresh pour afficher nouvelles notes
     header("Location: noter_etudiant.php?id_etudiant=$id_etudiant&id_matiere=$id_matiere");
     exit;
 }

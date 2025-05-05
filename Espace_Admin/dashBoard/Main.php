@@ -56,7 +56,7 @@ $num_demandes = $num_demandes_query->fetchColumn();
 
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #f5f7fa;
+      background-color:rgb(251, 242, 200);
       color: var(--dark);
       line-height: 1.6;
       min-height: 100vh;
@@ -444,6 +444,8 @@ $num_demandes = $num_demandes_query->fetchColumn();
       </div>
     </div>
     
+
+
     <div class="stats-notifs">
       <div class="stat-box">
         <h3 class="section-title"><i class="fas fa-chart-bar"></i> Statistiques détaillées</h3>
