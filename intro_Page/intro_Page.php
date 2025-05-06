@@ -1,3 +1,21 @@
+<?php
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
+    $login = $_POST['login'];
+    
+    switch ($login) {
+        case 'etudiant':
+            header("Location: ../Espace_Etudiant/logIn/logIn.php");
+            exit;
+        case 'enseignant':
+            header("Location: ../Espace_Enseignant/logIn/logIn.php");
+            exit;
+        case 'administrateur':
+            header("Location: ../Espace_Admin/logIn/logIn.php");
+            exit;
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="fr"dir="rtl">
 <head>
@@ -288,42 +306,47 @@
     </nav>
     
     <div class="main">
-        <form method="post" id="loginform" class="login-options">
-            <div class="option-box" onclick="selectLogin('etudiant')">
-                <div class="image-container">
-                    <img src="../Images/students.webp" alt="Espace Élève">
-                </div>
-                <div class="content">
-                    <div class="icon"><i class="fas fa-user-graduate"></i></div>
-                    <h3>Espace etudiant</h3>
-                    <p>Accédez à la plateforme pédagogique étudiante pour suivre les cours, les exercices et les résultats.</p>
-                </div>
-            </div>
-            
-            <div class="option-box" onclick="selectLogin('enseignant')">
-                <div class="image-container">
-                    <img src="../Images/teaches.jpg" alt="Espace Enseignant">
-                </div>
-                <div class="content">
-                    <div class="icon"><i class="fas fa-chalkboard-teacher"></i></div>
-                    <h3>Espace enseignants</h3>
-                    <p>Accédez à la plateforme pédagogique permettant aux enseignants de gérer les cours et les évaluations.</p>
-                </div>
-            </div>
-            
-            <div class="option-box" onclick="selectLogin('administrateur')">
-                <div class="image-container">
-                    <img src="../Images/admin.jpg" alt="Espace Directeur">
-                </div>
-                <div class="content">
-                    <div class="icon"><i class="fas fa-user-tie"></i></div>
-                    <h3>Espace administratif</h3>
-                    <p>Connectez-vous au panneau de contrôle administratif pour la gestion de l'école et des ressources humaines</p>
-                </div>
-            </div>
-            
-            <input type="hidden" name="login" id="loginInput">
-        </form>
+    <form method="post" id="loginform" class="login-options">
+    <!-- Etudiant -->
+    <input type="radio" name="login" value="etudiant" id="etudiant" hidden onchange="document.getElementById('loginform').submit();">
+    <label class="option-box" for="etudiant">
+        <div class="image-container">
+            <img src="../Images/students.webp" alt="Espace Élève">
+        </div>
+        <div class="content">
+            <div class="icon"><i class="fas fa-user-graduate"></i></div>
+            <h3>Espace etudiant</h3>
+            <p>Accédez à la plateforme pédagogique étudiante pour suivre les cours, les exercices et les résultats.</p>
+        </div>
+    </label>
+
+    <!-- Enseignant -->
+    <input type="radio" name="login" value="enseignant" id="enseignant" hidden onchange="document.getElementById('loginform').submit();">
+    <label class="option-box" for="enseignant">
+        <div class="image-container">
+            <img src="../Images/teaches.jpg" alt="Espace Enseignant">
+        </div>
+        <div class="content">
+            <div class="icon"><i class="fas fa-chalkboard-teacher"></i></div>
+            <h3>Espace enseignants</h3>
+            <p>Accédez à la plateforme pédagogique permettant aux enseignants de gérer les cours et les évaluations.</p>
+        </div>
+    </label>
+
+    <!-- Administrateur -->
+    <input type="radio" name="login" value="administrateur" id="administrateur" hidden onchange="document.getElementById('loginform').submit();">
+    <label class="option-box" for="administrateur">
+        <div class="image-container">
+            <img src="../Images/admin.jpg" alt="Espace Directeur">
+        </div>
+        <div class="content">
+            <div class="icon"><i class="fas fa-user-tie"></i></div>
+            <h3>Espace administratif</h3>
+            <p>Connectez-vous au panneau de contrôle administratif pour la gestion de l'école et des ressources humaines</p>
+        </div>
+    </label>
+</form>
+
     </div>
     
     <footer>

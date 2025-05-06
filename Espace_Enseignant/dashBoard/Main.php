@@ -8,6 +8,8 @@ $id_enseignant = $_SESSION['id_enseignant'];
 $nom_enseignant = htmlspecialchars($_SESSION['nom_enseignant']) ;
 $email_enseignant = htmlspecialchars($_SESSION['email_enseignant']) ?? 'unknown@unknown.unknown';
 
+$
+
 ?>
 
 <!DOCTYPE html>
@@ -437,69 +439,22 @@ $email_enseignant = htmlspecialchars($_SESSION['email_enseignant']) ?? 'unknown@
         <div class="card-icon">
           <i class="fas fa-users"></i>
         </div>
-        <h3 class="card-title">Étudiants inscrits</h3>
-        <p class="card-value">142</p>
-        <p class="card-description">+12 ce mois-ci</p>
+        <h3 class="card-title">Étudiants de votre filiere</h3>
+        <p class="card-value"><?= $num_etudiants ?></p>
       </div>
       
-      <div class="card glass-panel">
-        <div class="card-icon">
-          <i class="fas fa-book-open"></i>
-        </div>
-        <h3 class="card-title">Cours actifs</h3>
-        <p class="card-value">8</p>
-        <p class="card-description">2 nouveaux cette semaine</p>
-      </div>
+      
       
       <div class="card glass-panel">
         <div class="card-icon">
           <i class="fas fa-tasks"></i>
         </div>
         <h3 class="card-title">Devoirs à corriger</h3>
-        <p class="card-value">24</p>
-        <p class="card-description">3 en retard</p>
+        <p class="card-value"><?= $chhal_mndevoir_corrigee ?></p>
       </div>
     </section>
     
-    <section class="recent-activity glass-panel">
-      <h2 class="section-title">
-        <i class="fas fa-bell"></i>
-        Activité récente
-      </h2>
-      
-      <ul class="activity-list">
-        <li class="activity-item">
-          <div class="activity-icon">
-            <i class="fas fa-user-graduate"></i>
-          </div>
-          <div class="activity-content">
-            <h4>Nouvel étudiant inscrit</h4>
-            <p>Jean Dupont a rejoint votre cours de Mathématiques</p>
-          </div>
-          <span class="activity-time">10 min</span>
-        </li>
-        <li class="activity-item">
-          <div class="activity-icon">
-            <i class="fas fa-file-upload"></i>
-          </div>
-          <div class="activity-content">
-            <h4>Devoir soumis</h4>
-            <p>Marie Curie a soumis son devoir de Physique</p>
-          </div>
-          <span class="activity-time">1h</span>
-        </li>
-        <li class="activity-item">
-          <div class="activity-icon">
-            <i class="fas fa-comment"></i>
-          </div>
-          <div class="activity-content">
-            <h4>Nouveau message</h4>
-            <p>Pierre Durand a posté une question sur le forum</p>
-          </div>
-          <span class="activity-time">3h</span>
-        </li>
-      </ul>
-    </section>
+    
   </main>
 </body>
 </html>
