@@ -9,152 +9,112 @@ if (!isset($_SESSION['id_enseignant'])) {
 
 $id_enseignant = $_SESSION['id_enseignant'];
 
-
-// Récupérer l'ID de la filière de l'enseignant
+// Récupérer la filière
 $sql_filiere = "SELECT id_filiere FROM enseignants WHERE id_enseignant = ?";
-$stmt_filiere = $dba->prepare($sql_filiere);
-$stmt_filiere->execute([$id_enseignant]);
-$id_filiere = $stmt_filiere->fetchColumn();
+$stmt = $dba->prepare($sql_filiere);
+$stmt->execute([$id_enseignant]);
+$id_filiere = $stmt->fetchColumn();
 
 // Récupérer tous les étudiants de la filière
 $sql_etudiants = "SELECT id_etudiant, nom FROM etudiants WHERE id_filiere = ?";
-$stmt_etudiants = $dba->prepare($sql_etudiants);
-$stmt_etudiants->execute([$id_filiere]);
-$etudiants = $stmt_etudiants->fetchAll();
+$stmt = $dba->prepare($sql_etudiants);
+$stmt->execute([$id_filiere]);
+$etudiants = $stmt->fetchAll();
 
-// Calcul des statistiques
+// Récupérer les moyennes des étudiants depuis la table moyennes_generaux
+$sql_moyennes = "SELECT id_etudiant, moyenne FROM moyennes_generaux WHERE id_filiere = ?";
+$stmt = $dba->prepare($sql_moyennes);
+$stmt->execute([$id_filiere]);
+$moyennes = $stmt->fetchAll(PDO::FETCH_KEY_PAIR); // id_etudiant => moyenne
+
+$etudiants_valides = [];
 $total_moyenne_filiere = 0;
-$etudiants_valides = 0;
+$nb_reussite = 0;
+$meilleur_etudiant = null;
+$meilleure_moyenne = -1;
 
+// Vérifier les conditions pour chaque étudiant
+foreach ($etudiants as $etudiant) {
+    $id = $etudiant['id_etudiant'];
+    $nom = $etudiant['nom'];
+
+    // 1. Vérifier s’il a une moyenne dans la table
+    if (!array_key_exists($id, $moyennes) || $moyennes[$id] === null) {
+        continue;
+    }
+
+    // 2. Vérifier s’il a au moins 3 notes pour chaque matière
+    $sql_notes = "SELECT id_matiere, note FROM evaluations WHERE id_etudiant = ?";
+    $stmt = $dba->prepare($sql_notes);
+    $stmt->execute([$id]);
+    $notes = $stmt->fetchAll();
+
+    $notes_par_matiere = [];
+    foreach ($notes as $note) {
+        $notes_par_matiere[$note['id_matiere']][] = $note['note'];
+    }
+
+    $matiere_incomplete = false;
+    foreach ($notes_par_matiere as $notes_matiere) {
+        if (count($notes_matiere) < 3) {
+            $matiere_incomplete = true;
+            break;
+        }
+    }
+
+    if ($matiere_incomplete) {
+        continue;
+    }
+
+    // Si tout est OK, on ajoute à la liste des valides
+    $etudiants_valides[] = [
+        'nom' => $nom,
+        'moyenne' => $moyennes[$id]
+    ];
+
+    $total_moyenne_filiere += $moyennes[$id];
+
+    if ($moyennes[$id] >= 10) {
+        $nb_reussite++;
+    }
+
+    if ($moyennes[$id] > $meilleure_moyenne) {
+        $meilleure_moyenne = $moyennes[$id];
+        $meilleur_etudiant = $nom;
+    }
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statistiques des Étudiants</title>
 </head>
 <body>
 
-<h2>Statistiques des Étudiants dans votre Filière</h2>
+<h2>Statistiques des Étudiants de la Filière</h2>
 
-<table border="1">
-    <tr>
-        <th>Nom de l'Étudiant</th>
-        <th>Moyenne Générale</th>
-    </tr>
+<?php if (count($etudiants_valides) < count($etudiants)): ?>
+    <p><strong>Le semestre n’est pas encore terminé.</strong></p>
+<?php else: ?>
+    <table border="1">
+        <tr>
+            <th>Nom de l'Étudiant</th>
+            <th>Moyenne Générale</th>
+        </tr>
+        <?php foreach ($etudiants_valides as $etudiant): ?>
+            <tr>
+                <td><?= htmlspecialchars($etudiant['nom']) ?></td>
+                <td><?= number_format($etudiant['moyenne'], 2) ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </table>
 
-    <?php
-    // Afficher les statistiques des étudiants
-    foreach ($etudiants as $etudiant) {
-        $id_etudiant = $etudiant['id_etudiant'];
-
-        // Récupérer les notes de l'étudiant pour toutes ses matières
-        $sql_notes = "SELECT id_matiere, note FROM evaluations WHERE id_etudiant = ?";
-        $stmt_notes = $dba->prepare($sql_notes);
-        $stmt_notes->execute([$id_etudiant]);
-        $notes = $stmt_notes->fetchAll();
-
-        // Vérifier si l'étudiant a toutes ses notes pour chaque matière
-        $notes_par_matiere = [];
-        foreach ($notes as $note) {
-            $notes_par_matiere[$note['id_matiere']][] = $note['note'];
-        }
-
-        // Vérifier si toutes les matières ont 3 notes
-        $toutes_les_notes = true;
-        foreach ($notes_par_matiere as $matiere => $notes_matiere) {
-            if (count($notes_matiere) < 3) {
-                $toutes_les_notes = false;
-                break;
-            }
-        }
-
-        if ($toutes_les_notes) {
-            // Si l'étudiant a toutes ses notes, calculer la moyenne générale
-            $total_notes = 0;
-            $nombre_de_notes = 0;
-
-            foreach ($notes_par_matiere as $notes_matiere) {
-                $total_notes += array_sum($notes_matiere);
-                $nombre_de_notes += count($notes_matiere);
-            }
-
-            $moyenne_generale = $total_notes / $nombre_de_notes;
-
-            // Calculer les statistiques de la filière
-            $total_moyenne_filiere += $moyenne_generale;
-            $etudiants_valides++;
-        } else {
-            // Si l'étudiant n'a pas toutes ses notes, afficher "N/A"
-            $moyenne_generale = 'N/A';
-        }
-
-        // Afficher l'étudiant et sa moyenne générale
-        echo "<tr>";
-        echo "<td>{$etudiant['nom']}</td>";
-        echo "<td>$moyenne_generale</td>";
-        echo "</tr>";
-    }
-    ?>
-
-</table>
-
-<p><strong>Statistiques globales de la filière :</strong></p>
-
-<?php
-// Calculer la moyenne de la filière
-$moyenne_filiere = $etudiants_valides > 0 ? $total_moyenne_filiere / $etudiants_valides : 'N/A';
-echo "<p>Moyenne générale de la filière : $moyenne_filiere</p>";
-
-// Calculer le taux de réussite (par exemple, étudiants ayant une moyenne générale >= 10)
-$taux_reussite = 0;
-foreach ($etudiants as $etudiant) {
-    $id_etudiant = $etudiant['id_etudiant'];
-
-    // Récupérer les notes de l'étudiant pour toutes ses matières
-    $sql_notes = "SELECT id_matiere, note FROM evaluations WHERE id_etudiant = ?";
-    $stmt_notes = $dba->prepare($sql_notes);
-    $stmt_notes->execute([$id_etudiant]);
-    $notes = $stmt_notes->fetchAll();
-
-    // Vérifier si l'étudiant a toutes ses notes pour chaque matière
-    $notes_par_matiere = [];
-    foreach ($notes as $note) {
-        $notes_par_matiere[$note['id_matiere']][] = $note['note'];
-    }
-
-    $toutes_les_notes = true;
-    foreach ($notes_par_matiere as $matiere => $notes_matiere) {
-        if (count($notes_matiere) < 3) {
-            $toutes_les_notes = false;
-            break;
-        }
-    }
-
-    if ($toutes_les_notes) {
-        // Calculer la moyenne générale de l'étudiant
-        $total_notes = 0;
-        $nombre_de_notes = 0;
-
-        foreach ($notes_par_matiere as $notes_matiere) {
-            $total_notes += array_sum($notes_matiere);
-            $nombre_de_notes += count($notes_matiere);
-        }
-
-        $moyenne_generale = $total_notes / $nombre_de_notes;
-        
-        // Si la moyenne est >= 10, l'étudiant est considéré comme ayant réussi
-        if ($moyenne_generale >= 10) {
-            $taux_reussite++;
-        }
-    }
-}
-
-$pourcentage_reussite = $etudiants_valides > 0 ? ($taux_reussite / $etudiants_valides) * 100 : 0;
-echo "<p>Taux de réussite (moyenne >= 10) : $pourcentage_reussite%</p>";
-?>
+    <p><strong>Moyenne Générale de la Filière:</strong> <?= number_format($total_moyenne_filiere / count($etudiants_valides), 2) ?></p>
+    <p><strong>Taux de Réussite (moyenne ≥ 10):</strong> <?= number_format(($nb_reussite / count($etudiants_valides)) * 100, 2) ?>%</p>
+    <p><strong>Meilleur Étudiant:</strong> <?= htmlspecialchars($meilleur_etudiant) ?> (<?= number_format($meilleure_moyenne, 2) ?>)</p>
+<?php endif; ?>
 
 </body>
 </html>
