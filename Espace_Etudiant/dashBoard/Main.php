@@ -150,6 +150,8 @@ $notifications = $stmt->fetchAll();
       <a href="Notes/notes.php"><i class="fas fa-book"></i> <span>Mes Notes</span></a>
       <a href="#"><i class="fas fa-user"></i> <span>Mon Profil</span></a>
       <a href="attestation.php" class="btn-attestation"><i class="fas fa-download"></i> <span>Télécharger Attestation</span></a>
+      <a href="relver_note.php" class="btn-attestation"><i class="fas fa-download"></i> <span>Télécharger Attestation</span></a>
+      <a href="bulletin.php" class="btn-attestation"><i class="fas fa-download"></i> <span>Télécharger Attestation</span></a>
     </nav>
     <div class="logout">
       <a href="../../logOut/logOut.php">Log out</a>
