@@ -2,7 +2,7 @@
 <html lang="fr"dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Espace Scolaire - منصة التعليم</title>
+    <title>Espace Scolaire -Platforme educative </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -277,8 +277,7 @@
         <div class="marquee-container">
             <div class="marquee">
                 Bienvenue sur la plateforme scolaire - École Exemplar, Contact: 05 22 33 44 55 | Email: contact@ecole.ma | 
-                مرحبا بكم في المنصة التعليمية - مدرسة إكسيمبلار، للاتصال: 05 22 33 44 55 | البريد الإلكتروني: contact@ecole.ma
-            </div>
+                Bienvenue sur la plateforme éducative - École Supérieure de Technologie: 05 22 33 44 55 | 
         </div>
         
         <div class="logo-container">
@@ -296,8 +295,8 @@
                 </div>
                 <div class="content">
                     <div class="icon"><i class="fas fa-user-graduate"></i></div>
-                    <h3>فضاء التلاميذ</h3>
-                    <p>الدخول إلى المنصة التعليمية الخاصة بالتلاميذ لمتابعة الدروس والتمارين والنتائج</p>
+                    <h3>Espace etudiant</h3>
+                    <p>Accédez à la plateforme pédagogique étudiante pour suivre les cours, les exercices et les résultats.</p>
                 </div>
             </div>
             
@@ -307,8 +306,8 @@
                 </div>
                 <div class="content">
                     <div class="icon"><i class="fas fa-chalkboard-teacher"></i></div>
-                    <h3>فضاء الأساتذة</h3>
-                    <p>الدخول إلى المنصة التعليمية الخاصة بالأساتذة لإدارة الدروس والتقييمات</p>
+                    <h3>Espace enseignants</h3>
+                    <p>Accédez à la plateforme pédagogique permettant aux enseignants de gérer les cours et les évaluations.</p>
                 </div>
             </div>
             
@@ -318,8 +317,8 @@
                 </div>
                 <div class="content">
                     <div class="icon"><i class="fas fa-user-tie"></i></div>
-                    <h3>فضاء الإدارة</h3>
-                    <p>الدخول إلى لوحة التحكم الإدارية لإدارة المدرسة والموارد البشرية</p>
+                    <h3>Espace administratif</h3>
+                    <p>Connectez-vous au panneau de contrôle administratif pour la gestion de l'école et des ressources humaines</p>
                 </div>
             </div>
             
@@ -330,21 +329,21 @@
     <footer>
         <div class="footer-content">
             <div class="footer-section">
-                <h3>اتصل بنا</h3>
+                <h3>contactez-nous</h3>
                 <p><i class="fas fa-phone"></i> 05 22 33 44 55</p>
                 <p><i class="fas fa-envelope"></i> contact@ecole.ma</p>
             </div>
             
             <div class="footer-section">
-                <h3>العنوان</h3>
+                <h3>Titre</h3>
                 <p><i class="fas fa-map-marker-alt"></i> 123 Rue de l'Éducation</p>
                 <p>Casablanca, Maroc</p>
             </div>
             
             <div class="footer-section">
-                <h3>ساعات العمل</h3>
-                <p>من الاثنين إلى الجمعة</p>
-                <p>8:30 صباحا - 6:30 مساء</p>
+                <h3>heures de travail</h3>
+                <p>de lundi au vendredi </p>
+                <p>Matin 8:30 - soir 6:30</p>
             </div>
         </div>
         
