@@ -15,7 +15,7 @@ function demandeExiste($dba, $email) {
             $password = $_POST['password'];
             $password_hashed = hash('sha256', $password);
     
-            $query = $dba->prepare('SELECT id_enseignant,nom,prenom,password FROM enseignants WHERE email = ?');
+            $query = $dba->prepare('SELECT * FROM enseignants WHERE email = ?');
             $query->execute([$email]);
             $result = $query->fetch();
     
@@ -23,6 +23,7 @@ function demandeExiste($dba, $email) {
             if($result){
                 if($password_hashed === $result['password']){
                     $_SESSION['id_enseignant'] = $result['id_enseignant'];
+                    $_SESSION['id_filiere'] = $result['id_filiere'];
                     $_SESSION['nom_enseignant'] = $result['nom'] . " " . $result['prenom'];
                     $_SESSION['email_enseignant'] = $email;
                     header('Location: ../dashBoard/Main.php');

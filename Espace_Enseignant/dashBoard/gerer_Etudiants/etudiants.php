@@ -51,7 +51,7 @@ $email_enseignant = $_SESSION['email_enseignant'] ?? 'unknown@unknown.unknown';
             --light: #f8f9fa;
             --success: #4cc9f0;
             --warning:rgb(247, 37, 37);
-            --glass: rgba(255, 255, 255, 0.2);
+            --glass: rgba(255, 255, 255, 0.87);
             --glass-border: rgba(255, 255, 255, 0.3);
         }
         
@@ -63,7 +63,7 @@ $email_enseignant = $_SESSION['email_enseignant'] ?? 'unknown@unknown.unknown';
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #e0e5ec, #c8d6e5);
+            background: linear-gradient(135deg, #e0e5ec,rgb(235, 244, 254));
             color: var(--dark);
             overflow-x: hidden;
         }
@@ -422,9 +422,9 @@ $email_enseignant = $_SESSION['email_enseignant'] ?? 'unknown@unknown.unknown';
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="../Statistiques.php" class="nav-link">
                         <i class="fas fa-chalkboard"></i>
-                        <span class="nav-text">Mes Cours</span>
+                        <span class="nav-text">Statistiques</span>
                     </a>
                 </li>
             </ul>

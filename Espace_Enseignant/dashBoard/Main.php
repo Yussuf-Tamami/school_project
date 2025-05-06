@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../../dataBase/connection.php';
 if (!isset($_SESSION['nom_enseignant']) || !isset($_SESSION['email_enseignant'])) {
     echo "Vous n'êtes pas connecté.";
     exit;
@@ -7,8 +8,16 @@ if (!isset($_SESSION['nom_enseignant']) || !isset($_SESSION['email_enseignant'])
 $id_enseignant = $_SESSION['id_enseignant'];
 $nom_enseignant = htmlspecialchars($_SESSION['nom_enseignant']) ;
 $email_enseignant = htmlspecialchars($_SESSION['email_enseignant']) ?? 'unknown@unknown.unknown';
+$id_filiere = $_SESSION['id_filiere'];
 
-$
+
+$query = $dba->prepare('select count(id_etudiant) from etudiants where id_filiere = ?');
+$query->execute([$id_filiere]);
+$num_etudiants = $query->fetch();
+
+$q = $dba->prepare('select count(id_enseignant) from evaluations where id_enseignant = ?');
+$q->execute([$id_enseignant]);
+$chhal_mndevoir_corrigee = $q->fetch();
 
 ?>
 
@@ -39,7 +48,7 @@ $
     
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #e0e5ec, #c8d6e5);
+      background: linear-gradient(135deg, #e0e5ec,rgb(238, 246, 255));
       min-height: 100vh;
       color: var(--dark);
       overflow-x: hidden;
@@ -440,7 +449,7 @@ $
           <i class="fas fa-users"></i>
         </div>
         <h3 class="card-title">Étudiants de votre filiere</h3>
-        <p class="card-value"><?= $num_etudiants ?></p>
+        <p class="card-value"><?= $num_etudiants[0] ?></p>
       </div>
       
       
@@ -449,8 +458,8 @@ $
         <div class="card-icon">
           <i class="fas fa-tasks"></i>
         </div>
-        <h3 class="card-title">Devoirs à corriger</h3>
-        <p class="card-value"><?= $chhal_mndevoir_corrigee ?></p>
+        <h3 class="card-title">Devoirs corrigées</h3>
+        <p class="card-value"><?= $chhal_mndevoir_corrigee[0] ?></p>
       </div>
     </section>
     
