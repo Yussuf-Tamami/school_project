@@ -30,7 +30,7 @@ if(isset($_POST['login'])) {  // Changé de 'submitted' à 'login'
                 $query->execute([$result['id_filiere']]);
                 $_SESSION['id_filiere'] = $result['id_filiere'];
                 $_SESSION['nom_filiere'] = $query->fetch();
-                header('Location: ../dashBoard/Main.php');
+                header('Location: ../dashBoard/Main/Main.php');
                 exit;
             } else {
                 $error = "Mot de passe incorrect";

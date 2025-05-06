@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../../dataBase/connection.php';
+require_once '../../../dataBase/connection.php';
 
 if (!isset($_SESSION['id_etudiant'])) {
     echo "Non autorisé.";

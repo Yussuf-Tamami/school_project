@@ -355,8 +355,8 @@ $result= $q->fetch();
         </header>
 
         <div class="profile-section">
-            <img src="https://ui-avatars.com/api/?name=<?= urlencode($nom_etudiant) ?>&background=random" alt="Etudiant" class="profile-pic">
-            <div class="profile-info">
+        <img src="https://cdn-icons-png.flaticon.com/512/219/219986.png" alt="Avatar etudiant" class="profile-pic" style="margin-right: 2em;" >
+                    <div class="profile-info">
                 <h2><?php echo $nom_etudiant; ?></h2>
                 <p><?php echo $filiere[0]; ?></p>
             </div>

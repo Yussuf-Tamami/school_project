@@ -125,8 +125,8 @@ foreach ($matieres as $matiere) {
 if ($count_valid == count($matieres) && $count_valid > 0) {
     $moy_gen = round($total / $count_valid, 2);
     $pdf->Ln(5);
-    $pdf->Cell(0, 8, "Moyenne Générale : " . number_format($moy_gen, 2), 0, 1);
-    $pdf->Cell(0, 8, "Mention Générale : " . mention($moy_gen), 0, 1);
+    $pdf->Cell(0, 8, "Moyenne Generale : " . number_format($moy_gen, 2), 0, 1);
+    $pdf->Cell(0, 8, "Mention Generale : " . mention($moy_gen), 0, 1);
 }
 
 $pdf->Ln(10);
