@@ -8,8 +8,6 @@ $id_enseignant = $_SESSION['id_enseignant'];
 $nom_enseignant = htmlspecialchars($_SESSION['nom_enseignant']) ;
 $email_enseignant = htmlspecialchars($_SESSION['email_enseignant']) ?? 'unknown@unknown.unknown';
 
-$
-
 ?>
 
 <!DOCTYPE html>
