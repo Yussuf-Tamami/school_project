@@ -454,22 +454,22 @@ $num_demandes = $num_demandes_query->fetchColumn();
           <span class="stat-label">Départements</span>
           <span class="stat-value"><?php echo htmlspecialchars($num_departements); ?></span>
         </div>
-        
+        <hr>
         <div class="stat-item">
           <span class="stat-label">Filières actives</span>
           <span class="stat-value"><?php echo htmlspecialchars($num_filieres); ?></span>
         </div>
-        
+        <hr>
         <div class="stat-item">
           <span class="stat-label">Étudiants inscrits</span>
           <span class="stat-value"><?php echo htmlspecialchars($num_etudiants); ?></span>
         </div>
-        
+        <hr>
         <div class="stat-item">
           <span class="stat-label">Enseignants</span>
           <span class="stat-value"><?php echo htmlspecialchars($num_enseignants); ?></span>
         </div>
-        
+        <hr>
         <div class="stat-item">
           <span class="stat-label">Demandes en attente</span>
           <span class="stat-value"><?php echo htmlspecialchars($num_demandes); ?></span>

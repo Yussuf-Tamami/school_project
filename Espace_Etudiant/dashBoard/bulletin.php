@@ -123,7 +123,7 @@ if ($valid_materials == count($matieres) && $valid_materials > 0) {
     $pdf->Ln(5);
     $pdf->Cell(0, 8, "Moyenne Generale : " . number_format($moy_gen, 2), 0, 1);
     $pdf->Cell(0, 8, "Mention Generale : " . mention($moy_gen), 0, 1);
-    $pdf->Cell(0, 8, "Décision : " . (mention($moy_gen) == "Ajourne" ? "Ajourne" : "Admis"), 0, 1);
+    $pdf->Cell(0, 8, "Decision : " . (mention($moy_gen) == "Ajourne" ? "Ajourne" : "Admis"), 0, 1);
 } else {
     $pdf->Ln(5);
     $pdf->Cell(0, 8, "Moyenne Generale : -", 0, 1);

@@ -1,0 +1,10 @@
+body{
+    background-color: white;
+    transition: margin-left 0.3s;
+    color:  #1b263b;
+}
+
+.header h1 {
+    font-size: 1.8rem;
+    color: var(--dark);
+  }

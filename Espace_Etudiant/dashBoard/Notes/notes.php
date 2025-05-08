@@ -1,189 +1,265 @@
 <?php
-    session_start();
-    include '../../../dataBase/connection.php';
+session_start();
+include '../../../dataBase/connection.php';
 
-    if (!isset($_SESSION['nom_etudiant'])) {
-        header("Location: ../Main.php");
-        exit();
+if (!isset($_SESSION['nom_etudiant'])) {
+    header("Location: ../Main.php");
+    exit();
+}
+$username = $_SESSION['nom_etudiant'];
+$id_etudiant = $_SESSION['id_etudiant'];
+$id_filiere = $_SESSION['id_filiere'];
+$filiere = $_SESSION['nom_filiere'];
+
+// Récupération des matières de l'étudiant
+$sql_matieres = "
+    SELECT DISTINCT m.id_matiere, m.nom_matiere
+    FROM etudiants e
+    JOIN filieres f ON e.id_filiere = f.id_filiere
+    JOIN matieres m ON f.id_filiere = m.id_filiere
+    WHERE e.id_etudiant = ?
+";
+$stmt = $dba->prepare($sql_matieres);
+$stmt->execute([$id_etudiant]);
+$matieres = $stmt->fetchAll();
+
+$somme_moyennes = 0;
+$nombre_matieres_validees = 0;
+
+// Calcul de la moyenne de la classe
+$sql_etudiants_filiere = "SELECT id_etudiant FROM etudiants WHERE id_filiere = ?";
+$stmt_etuds = $dba->prepare($sql_etudiants_filiere);
+$stmt_etuds->execute([$id_filiere]);
+$etudiants_filiere = $stmt_etuds->fetchAll(PDO::FETCH_COLUMN);
+
+$total_moyennes = 0;
+$etudiants_valides = 0;
+$classe_valide = true;
+
+foreach ($etudiants_filiere as $id_etud) {
+    $stmt_mat = $dba->prepare($sql_matieres);
+    $stmt_mat->execute([$id_etud]);
+    $matieres_etud = $stmt_mat->fetchAll();
+
+    $somme = 0;
+    $nb = 0;
+
+    foreach ($matieres_etud as $matiere) {
+        $id_matiere = $matiere['id_matiere'];
+        $sql_notes = "SELECT note FROM evaluations 
+                      WHERE id_etudiant = ? AND id_matiere = ?
+                      ORDER BY num_devoir ASC";
+        $stmt_note = $dba->prepare($sql_notes);
+        $stmt_note->execute([$id_etud, $id_matiere]);
+        $notes = $stmt_note->fetchAll(PDO::FETCH_COLUMN);
+
+        $valid = array_filter($notes, fn($n) => $n !== '');
+        if (count($valid) == 3) {
+            $somme += array_sum($valid) / 3;
+            $nb++;
+        } else {
+            $classe_valide = false;
+            break 2;
+        }
     }
 
-    $id_etudiant = $_SESSION['id_etudiant'];
-    $id_filiere = $_SESSION['id_filiere'];
+    if ($nb > 0) {
+        $total_moyennes += $somme / $nb;
+        $etudiants_valides++;
+    }
+}
 
+$moyenne_classe = $classe_valide && $etudiants_valides > 0
+    ? number_format($total_moyennes / $etudiants_valides, 2)
+    : 'Incomplet';
 ?>
 
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>ملاحظاتي</title>
+    <title>Mes Résultats</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: #f2f2f2;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color:rgb(219, 217, 217);
+            margin: 0;
             padding: 20px;
-            direction: rtl;
+            direction: ltr;
         }
-        table {
-            width: 90%;
+
+        .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+        .container {
+            max-width: 900px;
             margin: auto;
-            border-collapse: collapse;
-            background: white;
-            margin-bottom: 20px;
+            background: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
         }
-        th, td {
-            border: 1px solid #999;
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #1b263b;
+        }
+
+        .header p {
+            color: #555;
+        }
+
+        .grades-table,
+        .average-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .grades-table th,
+        .grades-table td,
+        .average-table th,
+        .average-table td {
+            border: 1px solid #ccc;
             padding: 10px;
             text-align: center;
         }
-        th {
-            background-color: #4CAF50;
+
+        .grades-table th {
+            background-color: #1b263b;
             color: white;
         }
-        td {
-            font-size: 16px;
+
+        .average-table th {
+            background-color: #f0f0f0;
+            color: #333;
+            text-align: left;
         }
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
+
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+
+        .warning {
+            color: red;
+            font-weight: bold;
+        }
+
+        .highlight {
+            background-color: #f9f9f9;
+            font-weight: bold;
+        }
+
+        .no-data {
+            color: #aaa;
+        }
+
+        .subject-name {
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
+<div class="user-info">
+        <img src="https://ui-avatars.com/api/?name=<?= urlencode($username) ?>&background=random" alt="Etudiant" style="border-radius: 50%; scale: .7;">
+        <span style="font-weight: bold;"><?php echo $username . " | "?></span> 
+        <span class="filiere-badge"><?php echo $filiere[0]; ?></span>
+        </div>
+    <br><br>
+    <div style="width: 177px; height: 100px; background-color:rgba(246, 231, 231, 0.91); box-shadow:#1b263b 2px 2px 15px; border-radius:8px; position:absolute; bottom:25px; left:25px; align-items:center;text-align:center;">
+        <h4 style=" font-size: larger; color:#1b263b;">Retour à l'accueil</h4>
+        <a href="../Main/Main.php" style="color: #1b263b; position:absolute; left: 65px; top: 55px; font-size: 1.7em;">
+            <i class="fas fa-undo"></i>
+        </a>
+    </div>
 
-<h2>نتائج الطالب</h2>
+    <div class="container">
+        <div class="header">
+            <h1>Mes Résultats</h1>
+            <p>Affichage des notes et moyennes de l'année scolaire</p>
+        </div>
 
-<table>
-    <tr>
-        <th>المادة</th>
-        <th>الفرض الأول</th>
-        <th>الفرض الثاني</th>
-        <th>الفرض الثالث</th>
-        <th>المعدل</th>
-    </tr>
+        <table class="grades-table">
+            <thead>
+                <tr>
+                    <th>Matière</th>
+                    <th>Devoir 1</th>
+                    <th>Devoir 2</th>
+                    <th>Devoir 3</th>
+                    <th>Moyenne</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                foreach ($matieres as $matiere) {
+                    $id_matiere = $matiere['id_matiere'];
+                    $nom_matiere = $matiere['nom_matiere'];
 
-    <?php
-        $sql_matieres = "
-            SELECT DISTINCT m.id_matiere, m.nom_matiere
-            FROM etudiants e
-            JOIN filieres f ON e.id_filiere = f.id_filiere
-            JOIN matieres m ON f.id_filiere = m.id_filiere
-            WHERE e.id_etudiant = ?
-        ";
+                    $sql_notes = "SELECT note FROM evaluations 
+                                  WHERE id_etudiant = ? AND id_matiere = ?
+                                  ORDER BY num_devoir ASC";
+                    $stmt_notes = $dba->prepare($sql_notes);
+                    $stmt_notes->execute([$id_etudiant, $id_matiere]);
+                    $notes = $stmt_notes->fetchAll(PDO::FETCH_COLUMN);
 
-        $stmt = $dba->prepare($sql_matieres);
-        $stmt->execute([$id_etudiant]);
-        $matieres = $stmt->fetchAll();
+                    while (count($notes) < 3) $notes[] = '';
 
-        $somme_moyennes = 0;
-        $nombre_matieres_validees = 0;
+                    $valid_notes = array_filter($notes, fn($n) => $n !== '');
+                    $moyenne = count($valid_notes) == 3 ? number_format(array_sum($valid_notes) / 3, 2) : '—';
 
-        foreach ($matieres as $matiere) {
-            $id_matiere = $matiere['id_matiere'];
-            $nom_matiere = $matiere['nom_matiere'];
+                    if ($moyenne !== '—') {
+                        $somme_moyennes += $moyenne;
+                        $nombre_matieres_validees++;
+                    }
 
-            $sql_notes = "SELECT note FROM evaluations 
-                          WHERE id_etudiant = ? AND id_matiere = ?
-                          ORDER BY num_devoir asc";
-            $stmt_notes = $dba->prepare($sql_notes);
-            $stmt_notes->execute([$id_etudiant, $id_matiere]);
-            $notes = $stmt_notes->fetchAll(PDO::FETCH_COLUMN);
-
-            while (count($notes) < 3) $notes[] = '';
-
-            $valide_notes = array_filter($notes, fn($n) => $n !== '');
-            $moyenne = count($valide_notes) == 3 ? number_format(array_sum($valide_notes)/3, 2) : '—';
-
-            if ($moyenne !== '—') {
-                $somme_moyennes += $moyenne;
-                $nombre_matieres_validees++;
-            }
-
-            echo "<tr>";
-            echo "<td>$nom_matiere</td>";
-            echo "<td>{$notes[0]}</td>";
-            echo "<td>{$notes[1]}</td>";
-            echo "<td>{$notes[2]}</td>";
-            echo "<td>$moyenne</td>";
-            echo "</tr>";
-        }
-
-        $mo3adal_l3am = $nombre_matieres_validees == count($matieres) && $nombre_matieres_validees > 0
-    ? round($somme_moyennes / $nombre_matieres_validees, 2)
-    : '';
-
-
-            if ($mo3adal_l3am !== '') {
-                $adding_moyenne = $dba->prepare('
-                    INSERT INTO moyennes_generaux (id_etudiant, id_filiere, moyenne) 
-                    VALUES (:id_etudiant, :id_filiere, :moyenne)
-                    ON DUPLICATE KEY UPDATE moyenne = :moyenne
-                ');
-                $adding_moyenne->bindValue(':id_etudiant', $id_etudiant);
-                $adding_moyenne->bindValue(':id_filiere', $id_filiere);
-                $adding_moyenne->bindValue(':moyenne', $mo3adal_l3am);
-                $adding_moyenne->execute();
-            }
-            
-        // Moyenne de classe
-        $sql_etudiants_filiere = "SELECT id_etudiant FROM etudiants WHERE id_filiere = (
-            SELECT id_filiere FROM etudiants WHERE id_etudiant = ?
-        )";
-        $stmt_etuds = $dba->prepare($sql_etudiants_filiere);
-        $stmt_etuds->execute([$id_etudiant]);
-        $etudiants_filiere = $stmt_etuds->fetchAll(PDO::FETCH_COLUMN);
-
-        $total_moyennes = 0;
-        $etudiants_valides = 0;
-        $classe_valide = true;
-
-        foreach ($etudiants_filiere as $id_etud) {
-            $stmt_mat = $dba->prepare($sql_matieres);
-            $stmt_mat->execute([$id_etud]);
-            $matieres_etud = $stmt_mat->fetchAll();
-
-            $somme = 0;
-            $nb = 0;
-
-            foreach ($matieres_etud as $matiere) {
-                $id_matiere = $matiere['id_matiere'];
-
-                $stmt_note = $dba->prepare($sql_notes);
-                $stmt_note->execute([$id_etud, $id_matiere]);
-                $notes = $stmt_note->fetchAll(PDO::FETCH_COLUMN);
-
-                $valid = array_filter($notes, fn($n) => $n !== '');
-                if (count($valid) == 3) {
-                    $somme += array_sum($valid) / 3;
-                    $nb++;
-                } else {
-                    $classe_valide = false;
-                    break 2;
+                    echo "<tr>";
+                    echo "<td class='subject-name'>$nom_matiere</td>";
+                    echo "<td>".($notes[0] !== '' ? $notes[0] : '<span class="no-data">—</span>')."</td>";
+                    echo "<td>".($notes[1] !== '' ? $notes[1] : '<span class="no-data">—</span>')."</td>";
+                    echo "<td>".($notes[2] !== '' ? $notes[2] : '<span class="no-data">—</span>')."</td>";
+                    echo "<td class='".($moyenne >= 10 ? 'success' : 'warning')."'>".($moyenne !== '—' ? $moyenne : '<span class="no-data">—</span>')."</td>";
+                    echo "</tr>";
                 }
-            }
 
-            if ($nb > 0) {
-                $total_moyennes += $somme / $nb;
-                $etudiants_valides++;
-            }
-        }
+                $moyenne_generale = ($nombre_matieres_validees == count($matieres) && $nombre_matieres_validees > 0)
+                    ? round($somme_moyennes / $nombre_matieres_validees, 2)
+                    : '';
 
-        $moyenne_classe = $classe_valide && $etudiants_valides > 0
-            ? number_format($total_moyennes / $etudiants_valides, 2)
-            : 'غير مكتمل';
-    ?>
-</table>
+                if ($moyenne_generale !== '') {
+                    $adding_moyenne = $dba->prepare('
+                        INSERT INTO moyennes_generaux (id_etudiant, id_filiere, moyenne) 
+                        VALUES (:id_etudiant, :id_filiere, :moyenne)
+                        ON DUPLICATE KEY UPDATE moyenne = :moyenne
+                    ');
+                    $adding_moyenne->execute([
+                        'id_etudiant' => $id_etudiant,
+                        'id_filiere' => $id_filiere,
+                        'moyenne' => $moyenne_generale
+                    ]);
+                }
+                ?>
+            </tbody>
+        </table>
 
-<table style="width: 50%;">
-    <tr>
-        <td>المعدل السنوي</td>
-        <td><?php echo $mo3adal_l3am; ?></td>
-    </tr>
-    <tr>
-        <td>معدل القسم</td>
-        <td><?php echo $moyenne_classe; ?></td>
-    </tr>
-</table>
-
+        <table class="average-table">
+            <tr>
+                <th>Moyenne Générale</th>
+                <td class="highlight"><?php echo $moyenne_generale ?: '<span class="no-data">Incomplète</span>'; ?></td>
+            </tr>
+            <tr>
+                <th>Moyenne de la Classe</th>
+                <td class="highlight"><?php echo $moyenne_classe; ?></td>
+            </tr>
+        </table>
+    </div>
 </body>
 </html>

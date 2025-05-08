@@ -500,7 +500,7 @@ try {
                     <i class="fas fa-envelope"></i>
                     <span>Demandes</span>
                 </a>
-                <a href="../Account.php">
+                <a href="../pageAccount.php">
                     <i class="fas fa-user-circle"></i>
                     <span><?php echo htmlspecialchars($admin_name); ?></span>
                 </a>

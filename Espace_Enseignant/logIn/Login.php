@@ -1,3 +1,115 @@
+<?php
+session_start();
+require_once '../../dataBase/connection.php';
+
+function demandeExiste($dba, $email) {
+  $query = $dba->prepare('SELECT id_demande FROM demandes WHERE email = ? AND status = "waiting"');
+  $query->execute([$email]);
+  return $query->fetch() !== false;
+}
+
+
+    if(isset($_POST['submitted'])){
+        if(!empty($_POST['email']) && !empty($_POST['password'])){
+            $email = $_POST['email'];
+            $password = $_POST['password'];
+            $password_hashed = hash('sha256', $password);
+    
+            $query = $dba->prepare('SELECT * FROM enseignants WHERE email = ?');
+            $query->execute([$email]);
+            $result = $query->fetch();
+    
+            $error = "";
+            if($result){
+                if($password_hashed === $result['password']){
+                    $_SESSION['id_enseignant'] = $result['id_enseignant'];
+                    $_SESSION['id_filiere'] = $result['id_filiere'];
+                    $_SESSION['nom_enseignant'] = $result['nom'] . " " . $result['prenom'];
+                    $_SESSION['email_enseignant'] = $email;
+                    header('Location: ../dashBoard/Main.php');
+                    exit;
+                }else{
+                    $error = "Mot de passe incorrecte";
+                }
+            }else{
+                $error = "Email introuvable";
+            }
+          }
+    }
+
+
+// At the top of your file (before any HTML output)
+$filieres = [];
+
+    $stmt = $dba->query("SELECT id_filiere, nom_filiere FROM filieres");
+    $filieres = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
+
+if (isset($_POST['signup'])) {
+ try {
+        $email = $_POST['email'];
+        
+        // Vérifier si l'utilisateur a déjà une demande en attente
+        if (demandeExiste($dba, $email)) {
+            $error = "Vous avez déjà une demande en attente de traitement.";
+            echo "<script>alert('".addslashes($error)."');</script>";
+        } else {
+            $id_filiere = $_POST['domain'];
+            $id_matiere = $_POST['matiere'];
+            $password = $_POST['password'];
+            $password_hashed = hash('sha256', $password);
+            // Get filiere name for the demande
+            $stmt = $dba->prepare("SELECT nom_filiere FROM filieres WHERE id_filiere = ?");
+            $stmt->execute([$id_filiere]);
+            $filiere = $stmt->fetch(PDO::FETCH_ASSOC);
+            $specialite_nom = $filiere['nom_filiere'];
+
+            // Vérifier si l'email est déjà utilisé comme enseignant
+            $stmt = $dba->prepare("SELECT id_enseignant FROM enseignants WHERE email = ?");
+            $stmt->execute([$email]);
+            if ($stmt->fetch()) {
+                $error = "Cet email est déjà utilisé par un enseignant.";
+                echo "<script>alert('".addslashes($error)."');</script>";
+            } else {
+                // Prepare the insert statement
+               // Dans votre code d'inscription (enseignant_login.php)
+$query = $dba->prepare('INSERT INTO demandes (nom, prenom, email, password, id_filiere_demandé, id_matiere_demandé, identite, specialité, status, date_demande) 
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, "waiting", NOW())');
+
+                // Execute with parameters
+                $insert_result = $query->execute([
+                    $_POST['nom'],
+                    $_POST['prenom'],
+                    $email,
+                    $password_hashed,
+                    $id_filiere,
+                    $id_matiere,
+                    "enseignant",
+                    $specialite_nom
+                ]);
+
+                if ($insert_result) {
+                    echo "<script>
+                        document.getElementById('demandeMessage').style.display = 'block';
+                        setTimeout(function() {
+                            document.getElementById('demandeMessage').style.display = 'none';
+                            switchToLogin();
+                        }, 3000);
+                    </script>";
+                } else {
+                    $errorInfo = $query->errorInfo();
+                    throw new Exception("Erreur de base de données: " . $errorInfo[2]);
+                }
+            }
+        }
+    } catch (Exception $e) {
+        $error = $e->getMessage();
+        echo "<script>alert('Erreur: " . addslashes($error) . "');</script>";
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,14 +139,29 @@
       position: relative;
     }
 
-    .school-logo {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      z-index: 100;
-      max-width: 120px;
-      height: auto;
-    }
+ .school-logo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    max-width: 120px;
+    height: auto;
+    transition: all 0.3s ease;
+    /* التحسينات الجديدة */
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
+    transform: scale(1.05);
+    border: 2px solid white;
+    border-radius: 8px;
+    padding: 5px;
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+}
+
+.school-logo:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+    background-color: rgba(255, 255, 255, 0.3);
+}
 
     .info-side {
       flex: 1;

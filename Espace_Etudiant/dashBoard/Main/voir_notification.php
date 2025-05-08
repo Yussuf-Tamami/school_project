@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../../dataBase/connection.php';
+include '../../../dataBase/connection.php';
 
 $id_notification = $_GET['id_notification'] ?? null;
 $id_etudiant = $_GET['id_etudiant'] ?? null;
@@ -16,6 +16,6 @@ $update = $dba->prepare("UPDATE notifications SET vu = 1 WHERE id_notification =
 $update->execute([$id_notification]);
 
 // Redirect to the target page (for example, page des notes)
-header("Location: Notes/notes.php");
+header("Location: ../Notes/notes.php");
 exit;
 ?>
