@@ -452,7 +452,7 @@ if (isset($_POST['signup'])) {
       const loginForm = document.getElementById("login-form");
       const signupForm = document.getElementById("signup-form");
       const infoSide = document.querySelector(".info-side");
-      
+       
       
       loginForm.classList.add("form-slide-out");
 
