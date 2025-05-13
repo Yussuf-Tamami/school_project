@@ -447,12 +447,15 @@ if (isset($_POST['signup'])) {
 
     <script>
     // Enhanced form switching with animations
+
     function switchToSignup() {
       const loginForm = document.getElementById("login-form");
       const signupForm = document.getElementById("signup-form");
       const infoSide = document.querySelector(".info-side");
       
+      
       loginForm.classList.add("form-slide-out");
+
       
       setTimeout(() => {
         loginForm.style.display = "none";
