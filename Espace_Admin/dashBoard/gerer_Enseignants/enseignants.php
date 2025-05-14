@@ -53,7 +53,7 @@ try {
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f5f7fa;
+            background-color:rgb(255, 252, 228);
             color: var(--dark);
             line-height: 1.6;
             min-height: 100vh;

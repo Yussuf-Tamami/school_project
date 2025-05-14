@@ -56,7 +56,7 @@ $num_demandes = $num_demandes_query->fetchColumn();
 
     body {
       font-family: 'Poppins', sans-serif;
-      background-color:rgb(251, 242, 200);
+      background-color:rgb(255, 249, 220);
       color: var(--dark);
       line-height: 1.6;
       min-height: 100vh;

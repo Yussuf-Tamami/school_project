@@ -84,7 +84,7 @@ try {
 body {
     font-family: 'Poppins', sans-serif;
     margin: 0;
-    background-color: rgb(255, 233, 195);
+    background-color: rgb(255, 243, 223);
     display: flex;
     min-height: 100vh;
 }
@@ -92,7 +92,7 @@ body {
 .container {
     flex: 1;
     margin-left: 250px; /* Offset for the sidebar */
-    background-color:rgb(255, 233, 195);
+    background-color:rgb(255, 243, 220);
     padding: 30px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }

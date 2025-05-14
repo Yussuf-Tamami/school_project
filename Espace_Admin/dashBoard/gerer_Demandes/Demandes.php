@@ -108,7 +108,7 @@ try {
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f5f7fa;
+            background-color:rgb(255, 255, 200);
             color: #333;
             line-height: 1.6;
         }

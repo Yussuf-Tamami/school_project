@@ -140,7 +140,7 @@ try {
                     <span class="detail-label">Spécialité:</span>
                     <span><?= htmlspecialchars($enseignant['specialite'] ?? 'Non spécifiée') ?></span>
                 </div>
-                <!-- Ajoutez d'autres champs selon votre table enseignants -->
+                
                 
                 <a href="enseignants.php" class="back-btn">Retour à la liste</a>
             </div>

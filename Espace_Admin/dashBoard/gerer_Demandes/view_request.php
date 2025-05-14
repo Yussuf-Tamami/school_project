@@ -1,6 +1,5 @@
 <?php
 
-use function PHPSTORM_META\type;
 
 session_start();
 require_once '../../../dataBase/connection.php';
@@ -12,7 +11,7 @@ if (!isset($_SESSION['admin_name'])) {
 }
 
 // Récupérer l'ID et le type de la demande
-$id_demande = $_GET['id_demande'] ?? null;  // Assurez-vous que c'est le même nom que dans le lien
+$id_demande = $_GET['id_demande'] ?? null; 
 $type = $_GET['type'] ?? null;
 
 if (!$id_demande || !$type) {
