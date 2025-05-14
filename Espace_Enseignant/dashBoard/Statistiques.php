@@ -426,7 +426,7 @@ $afficher_stats = ($num_etudiants == $num_moyennes);
         $stmt->execute([$id_filiere]);
         $etudiants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Calculs supplémentaires
+        
         $total_moyennes = 0;
         $nb_admis = 0;
         $meilleure = null;
@@ -504,7 +504,7 @@ $afficher_stats = ($num_etudiants == $num_moyennes);
         <div class="message">
             <i class="fas fa-hourglass-half message-icon"></i>
             <p class="message-text">Le semestre n'est pas encore terminé. Les statistiques seront disponibles une fois que toutes les moyennes seront calculées.</p>
-            <a href="../Main.php" class="btn btn-primary">Retour à l'accueil</a>
+            <a href="./Main.php" class="btn btn-primary">Retour à l'accueil</a>
         </div>
     <?php endif; ?>
 </div>
