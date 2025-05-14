@@ -127,6 +127,10 @@ $admin_email = $_SESSION['admin_email'];
         <label>Email :</label>
         <p><?= htmlspecialchars($admin_email) ?></p>
       </div>
+      <div class="info-item">
+        <label for="role">Role :</label>
+        <p>Administrateur</p>
+      </div>
     </div>
 
     <div class="btn-group">
