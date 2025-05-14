@@ -412,12 +412,5 @@ $result= $q->fetch();
         </div>
     </div>
 
-    <script>
-        // Toggle sidebar collapse
-        document.addEventListener('DOMContentLoaded', function() {
-            // You can add JavaScript here to handle sidebar toggling
-            // For example, add a button to toggle the sidebar
-        });
-    </script>
 </body>
 </html>

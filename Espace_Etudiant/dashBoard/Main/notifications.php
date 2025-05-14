@@ -9,11 +9,11 @@ if (!isset($_SESSION['id_etudiant'])) {
 
 $id_etudiant = $_SESSION['id_etudiant'];
 
-// 1. تحديث الإشعارات غير المقروءة إلى مقروءة عند فتح الصفحة
+
 $updateStmt = $dba->prepare("UPDATE notifications SET vu = 1 WHERE id_etudiant = ? AND vu = 0");
 $updateStmt->execute([$id_etudiant]);
 
-// 2. جلب آخر 10 إشعارات (الآن جميعها مقروءة)
+
 $stmt = $dba->prepare("SELECT * FROM notifications WHERE id_etudiant = ? ORDER BY date_notification DESC LIMIT 10");
 $stmt->execute([$id_etudiant]);
 $notifications = $stmt->fetchAll();
