@@ -139,29 +139,21 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, "waiting", NOW())');
       position: relative;
     }
 
- .school-logo {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 100;
-    max-width: 120px;
-    height: auto;
-    transition: all 0.3s ease;
-    /* التحسينات الجديدة */
-    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
-    transform: scale(1.05);
-    border: 2px solid white;
-    border-radius: 8px;
-    padding: 5px;
-    background-color: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(5px);
-}
+    .school-logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            max-width: 120px;
+            height: auto;
+            transition: all 0.3s ease;
+        }
 
-.school-logo:hover {
-    transform: scale(1.1);
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
-    background-color: rgba(255, 255, 255, 0.3);
-}
+        .school-logo:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
+        }
+
 
     .info-side {
       flex: 1;

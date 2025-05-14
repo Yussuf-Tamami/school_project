@@ -63,7 +63,7 @@ $num_demandes = $num_demandes_query->fetchColumn();
       display: flex;
     }
 
-    /* ========== Main Content ========== */
+    /* Maine */
     .user-profile {
             display: flex;
             align-items: center;
@@ -129,7 +129,7 @@ $num_demandes = $num_demandes_query->fetchColumn();
       color: #6c757d;
     }
 
-    /* ========== Cards ========== */
+    /* Cards  */
     .card-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -193,7 +193,7 @@ $num_demandes = $num_demandes_query->fetchColumn();
       color: var(--dark);
     }
 
-    /* ========== Stats & Notifications ========== */
+    /*  Stats & Notifications  */
     .stats-notifs {
       display: grid;
       grid-template-columns: 2fr 1fr;

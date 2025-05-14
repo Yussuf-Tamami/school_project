@@ -1,26 +1,36 @@
 <?php
+header("Cache-Control: no-cache, no-store, must-revalidate"); 
+header("Pragma: no-cache"); 
+header("Expires: 0"); 
+
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
     $login = $_POST['login'];
-    
+    $redirect_url = '';
+
     switch ($login) {
         case 'etudiant':
-            header("Location: ../Espace_Etudiant/logIn/logIn.php");
-            exit;
+            $redirect_url = '../Espace_Etudiant/logIn/logIn.php';
+            break;
         case 'enseignant':
-            header("Location: ../Espace_Enseignant/logIn/logIn.php");
-            exit;
+            $redirect_url = '../Espace_Enseignant/logIn/logIn.php';
+            break;
         case 'administrateur':
-            header("Location: ../Espace_Admin/logIn/logIn.php");
-            exit;
+            $redirect_url = '../Espace_Admin/logIn/logIn.php';
+            break;
+    }
+
+    if (!empty($redirect_url)) {
+        header("Location: " . $redirect_url);
+        exit;
     }
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="fr"dir="rtl">
+<html lang="fr" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Espace Scolaire -Platforme educative </title>
+    <title>Espace Scolaire - Platforme educative</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -39,13 +49,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
             color: #333;
         }
 
-        /* تحسين شريط التنقل */
         nav {
             height: 70px;
             width: 100%;
             background: linear-gradient(135deg, #2c3e50, #4a6491);
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             padding: 0 30px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -64,7 +73,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
         .school-name i {
             margin-left: 10px;
             font-size: 1.3rem;
-            
         }
 
         .marquee-container {
@@ -87,8 +95,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
         }
 
         .logo-container {
-            display: flex;
-            align-items: center;
+            position: absolute;
+            left: 30px;
+            top: 12px;
         }
 
         .circular-logo {
@@ -111,7 +120,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
             object-fit: cover;
         }
 
-        /* تحسين المنطقة الرئيسية */
         .main {
             flex: 1;
             display: flex;
@@ -131,6 +139,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
             left: 0;
             right: 0;
             bottom: 0;
+            background-color: rgba(0, 0, 0, 0.4);
             z-index: 0;
         }
 
@@ -202,14 +211,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
             margin-bottom: 15px;
         }
 
-        /* تحسين التذييل */
         footer {
             background: linear-gradient(135deg, #2c3e50, #4a6491);
             color: white;
             text-align: center;
-            padding: 20px;
+            padding: 15px 20px;
             font-size: 0.9rem;
             box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: auto;
         }
 
         .footer-content {
@@ -257,7 +266,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
             font-size: 0.8rem;
         }
 
-        /* تأثيرات إضافية */
         @media (max-width: 768px) {
             nav {
                 flex-direction: column;
@@ -274,6 +282,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
                 width: 100%;
             }
             
+            .logo-container {
+                position: static;
+                margin-top: 10px;
+            }
+            
             .option-box {
                 width: 100%;
                 max-width: 350px;
@@ -287,6 +300,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
 </head>
 <body>
     <nav>
+        <div class="logo-container">
+            <div class="circular-logo">
+                <img src="../Images/logo.png" alt="Logo de l'école">
+            </div>
+        </div>
+        
         <div class="school-name">
             <i class="fas fa-graduation-cap"></i>
             Ecole Superieure des Sciences et de l'Innovation
@@ -294,73 +313,67 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
         
         <div class="marquee-container">
             <div class="marquee">
-                Bienvenue sur la plateforme scolaire - École Exemplar, Contact: 05 22 33 44 55 | Email: contact@ecole.ma | 
-                Bienvenue sur la plateforme éducative - École Supérieure de Technologie: 05 22 33 44 55 | 
-        </div>
-        
-        <div class="logo-container">
-            <div class="circular-logo">
-                <img src="../Images/logo.png" alt="Logo de l'école">
+                Bienvenue sur la plateforme scolaire - Ecole Superieure des Sciences et de l'Innovation, Contact: +212 718 356 368 | Email:essiContact@um5.ac.ma | 
+                Ecole Superieure des Sciences et de l'Innovation| 
             </div>
         </div>
     </nav>
     
     <div class="main">
-    <form method="post" id="loginform" class="login-options">
-    <!-- Etudiant -->
-    <input type="radio" name="login" value="etudiant" id="etudiant" hidden onchange="document.getElementById('loginform').submit();">
-    <label class="option-box" for="etudiant">
-        <div class="image-container">
-            <img src="../Images/students.webp" alt="Espace Élève">
-        </div>
-        <div class="content">
-            <div class="icon"><i class="fas fa-user-graduate"></i></div>
-            <h3>Espace etudiant</h3>
-            <p>Accédez à la plateforme pédagogique étudiante pour suivre les cours, les exercices et les résultats.</p>
-        </div>
-    </label>
+        <form method="post" id="loginform" class="login-options">
+            <!-- Etudiant -->
+            <input type="radio" name="login" value="etudiant" id="etudiant" hidden onchange="document.getElementById('loginform').submit();">
+            <label class="option-box" for="etudiant">
+                <div class="image-container">
+                    <img src="../Images/students.webp" alt="Espace Élève">
+                </div>
+                <div class="content">
+                    <div class="icon"><i class="fas fa-user-graduate"></i></div>
+                    <h3>Espace etudiant</h3>
+                    <p>Accédez à la plateforme pédagogique étudiante pour suivre les cours, les exercices et les résultats.</p>
+                </div>
+            </label>
 
-    <!-- Enseignant -->
-    <input type="radio" name="login" value="enseignant" id="enseignant" hidden onchange="document.getElementById('loginform').submit();">
-    <label class="option-box" for="enseignant">
-        <div class="image-container">
-            <img src="../Images/teaches.jpg" alt="Espace Enseignant">
-        </div>
-        <div class="content">
-            <div class="icon"><i class="fas fa-chalkboard-teacher"></i></div>
-            <h3>Espace enseignants</h3>
-            <p>Accédez à la plateforme pédagogique permettant aux enseignants de gérer les cours et les évaluations.</p>
-        </div>
-    </label>
+            <!-- Enseignant -->
+            <input type="radio" name="login" value="enseignant" id="enseignant" hidden onchange="document.getElementById('loginform').submit();">
+            <label class="option-box" for="enseignant">
+                <div class="image-container">
+                    <img src="../Images/teaches.jpg" alt="Espace Enseignant">
+                </div>
+                <div class="content">
+                    <div class="icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                    <h3>Espace enseignants</h3>
+                    <p>Accédez à la plateforme pédagogique permettant aux enseignants de gérer les cours et les évaluations.</p>
+                </div>
+            </label>
 
-    <!-- Administrateur -->
-    <input type="radio" name="login" value="administrateur" id="administrateur" hidden onchange="document.getElementById('loginform').submit();">
-    <label class="option-box" for="administrateur">
-        <div class="image-container">
-            <img src="../Images/admin.jpg" alt="Espace Directeur">
-        </div>
-        <div class="content">
-            <div class="icon"><i class="fas fa-user-tie"></i></div>
-            <h3>Espace administratif</h3>
-            <p>Connectez-vous au panneau de contrôle administratif pour la gestion de l'école et des ressources humaines</p>
-        </div>
-    </label>
-</form>
-
+            <!-- Administrateur -->
+            <input type="radio" name="login" value="administrateur" id="administrateur" hidden onchange="document.getElementById('loginform').submit();">
+            <label class="option-box" for="administrateur">
+                <div class="image-container">
+                    <img src="../Images/admin.jpg" alt="Espace Directeur">
+                </div>
+                <div class="content">
+                    <div class="icon"><i class="fas fa-user-tie"></i></div>
+                    <h3>Espace administratif</h3>
+                    <p>Connectez-vous au panneau de contrôle administratif pour la gestion de l'école et des ressources humaines</p>
+                </div>
+            </label>
+        </form>
     </div>
     
     <footer>
         <div class="footer-content">
             <div class="footer-section">
                 <h3>contactez-nous</h3>
-                <p><i class="fas fa-phone"></i> 05 22 33 44 55</p>
-                <p><i class="fas fa-envelope"></i> contact@ecole.ma</p>
+                <p><i class="fas fa-phone"></i> +212 7 18 35 63 68</p>
+                <p><i class="fas fa-envelope"></i>essiContact@um5.ac.ma</p>
             </div>
             
             <div class="footer-section">
                 <h3>Titre</h3>
                 <p><i class="fas fa-map-marker-alt"></i> 123 Rue de l'Éducation</p>
-                <p>Casablanca, Maroc</p>
+                <p>Salé, Maroc</p>
             </div>
             
             <div class="footer-section">
@@ -378,17 +391,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
         </div>
         
         <div class="copyright">
-            &copy; 2023 École Exemplar. Tous droits réservés.
+            &copy; 2025 Ecole Superieure des Sciences et de l'Innovation. Tous droits réservés.
         </div>
     </footer>
     
     <script>
-        function selectLogin(role) {
-            document.getElementById('loginInput').value = role;
-            document.getElementById('loginform').submit();
-        }
-        
-        // تأثيرات إضافية عند التحميل
         document.addEventListener('DOMContentLoaded', function() {
             const options = document.querySelectorAll('.option-box');
             options.forEach((option, index) => {

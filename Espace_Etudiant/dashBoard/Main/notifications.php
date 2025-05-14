@@ -9,9 +9,12 @@ if (!isset($_SESSION['id_etudiant'])) {
 
 $id_etudiant = $_SESSION['id_etudiant'];
 
+// 1. تحديث الإشعارات غير المقروءة إلى مقروءة عند فتح الصفحة
+$updateStmt = $dba->prepare("UPDATE notifications SET vu = 1 WHERE id_etudiant = ? AND vu = 0");
+$updateStmt->execute([$id_etudiant]);
 
-// Récupérer les notifications
-$stmt = $dba->prepare("SELECT * FROM notifications WHERE id_etudiant = ? and vu = 0 ORDER BY date_notification DESC LIMIT 10");
+// 2. جلب آخر 10 إشعارات (الآن جميعها مقروءة)
+$stmt = $dba->prepare("SELECT * FROM notifications WHERE id_etudiant = ? ORDER BY date_notification DESC LIMIT 10");
 $stmt->execute([$id_etudiant]);
 $notifications = $stmt->fetchAll();
 ?>
@@ -40,6 +43,10 @@ $notifications = $stmt->fetchAll();
     .notif {
       border-bottom: 1px solid #eee;
       padding: 10px 0;
+      transition: background-color 0.3s;
+    }
+    .notif:hover {
+      background-color: #f5f5f5;
     }
     .notif:last-child {
       border-bottom: none;
@@ -47,23 +54,51 @@ $notifications = $stmt->fetchAll();
     .notif-time {
       color: #888;
       font-size: 0.8em;
+      margin-top: 5px;
     }
-    a{
-        text-decoration: none;
-        color:rgb(10, 61, 120);
+    .notif-message {
+      color: #333;
+      font-weight: normal;
+    }
+    a {
+      text-decoration: none;
+      color: rgb(10, 61, 120);
+    }
+    .no-notifications {
+      color: #666;
+      text-align: center;
+      padding: 20px;
+    }
+    .notification-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      color: #333;
     }
   </style>
 </head>
 <body>
   <div class="notif-box">
-    <h2><i class="fas fa-bell"></i> Mes Notifications</h2>
+    <div class="notification-header">
+      <i class="fas fa-bell" style="font-size: 1.5em;"></i>
+      <h2>Mes Notifications</h2>
+    </div>
+    
     <?php if (count($notifications) == 0): ?>
-      <p>Aucune notification.</p>
+      <div class="no-notifications">
+        <i class="far fa-bell-slash" style="font-size: 2em; margin-bottom: 10px;"></i>
+        <p>Aucune notification disponible</p>
+      </div>
     <?php else: ?>
       <?php foreach ($notifications as $notif): ?>
         <div class="notif">
-          <a href="./voir_notification.php?id_notification=<?= $notif['id_notification']?>&&id_etudiant=<?= $id_etudiant ?>"><p><?= htmlspecialchars($notif['message']) ?></p></a>
-          <div class="notif-time"><?= date('d/m/Y H:i', strtotime($notif['date_notification'])) ?></div>
+          <a href="./voir_notification.php?id_notification=<?= $notif['id_notification'] ?>&id_etudiant=<?= $id_etudiant ?>">
+            <div class="notif-message"><?= htmlspecialchars($notif['message']) ?></div>
+            <div class="notif-time">
+              <i class="far fa-clock"></i> <?= date('d/m/Y H:i', strtotime($notif['date_notification'])) ?>
+            </div>
+          </a>
         </div>
       <?php endforeach; ?>
     <?php endif; ?>

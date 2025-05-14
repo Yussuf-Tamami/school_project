@@ -111,6 +111,7 @@ if (isset($_POST['signup'])) {
             background-size: 50% auto;
             display: flex;
             flex-direction: column;
+        overflow-x: hidden;
         }
 
         .school-logo {
@@ -132,6 +133,7 @@ if (isset($_POST['signup'])) {
             display: flex;
             flex: 1;
             position: relative;
+            overflow: hidden;
         }
 
         .info-side {
@@ -145,6 +147,8 @@ if (isset($_POST['signup'])) {
             padding: 2rem;
             text-align: center;
             position: relative;
+            transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 1;
         }
 
         .info-side::before {
@@ -164,18 +168,21 @@ if (isset($_POST['signup'])) {
             position: relative;
             z-index: 1;
             max-width: 400px;
+            transition: all 0.4s ease;
         }
 
         .info-side h1 {
             font-size: 2rem;
             margin-bottom: 1rem;
             color: white;
+            transition: all 0.4s ease;
         }
 
         .info-side p {
             font-size: 1rem;
             color: #e5e7eb;
             line-height: 1.6;
+            transition: all 0.4s ease;
         }
 
         .form-side {
@@ -184,6 +191,7 @@ if (isset($_POST['signup'])) {
             justify-content: center;
             align-items: center;
             padding: 2rem;
+            position: relative;
         }
 
         .login-form {
@@ -193,7 +201,22 @@ if (isset($_POST['signup'])) {
             padding: 2rem;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: absolute;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .login-form.hidden {
+            opacity: 0;
+            transform: translateX(100px);
+            pointer-events: none;
+        }
+
+        .login-form.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
         }
 
         .login-form:hover {
@@ -239,18 +262,18 @@ if (isset($_POST['signup'])) {
         }
 
         .btn {
-        width: 100%;
-        margin: 5px;
-      padding: 0.9rem;
-      background-color: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            margin: 5px;
+            padding: 0.9rem;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .btn-primary {
@@ -290,6 +313,7 @@ if (isset($_POST['signup'])) {
             margin-bottom: 1rem;
             font-size: 0.9rem;
             border-left: 3px solid #dc2626;
+            animation: fadeIn 0.3s ease-out;
         }
 
         .success-message {
@@ -306,12 +330,16 @@ if (isset($_POST['signup'])) {
             animation: slideIn 0.3s ease-out;
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
                 opacity: 0;
             }
-
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -323,10 +351,32 @@ if (isset($_POST['signup'])) {
                 transform: translateX(0);
                 opacity: 1;
             }
-
             to {
                 transform: translateX(100%);
                 opacity: 0;
+            }
+        }
+
+        /* New animations for form transitions */
+        @keyframes formSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes formSlideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-50px);
             }
         }
 
@@ -353,6 +403,11 @@ if (isset($_POST['signup'])) {
             .form-side {
                 padding: 1rem;
             }
+
+            .login-form {
+                position: relative;
+                margin: 0 auto;
+            }
         }
     </style>
 </head>
@@ -370,10 +425,10 @@ if (isset($_POST['signup'])) {
         </div>
 
         <div class="form-side">
-            <form class="login-form" method="post" id="login-form">
+            <form class="login-form active" method="post" id="login-form">
                 <h2>Login</h2>
                 <?php if (!empty($error)): ?>
-                        <div class="error-message"><?= htmlspecialchars($error) ?></div>
+                            <div class="error-message"><?= htmlspecialchars($error) ?></div>
                 <?php endif; ?>
 
                 <div class="form-group">
@@ -390,10 +445,10 @@ if (isset($_POST['signup'])) {
                 <button type="button" onclick="switchToSignup()" class="btn btn-success">Demande d'inscription</button>
             </form>
 
-            <form class="login-form" method="post" id="signup-form" style="display: none;">
+            <form class="login-form hidden" method="post" id="signup-form">
                 <h2>Demande d'inscription</h2>
                 <?php if (!empty($error)): ?>
-                        <div class="error-message"><?= htmlspecialchars($error) ?></div>
+                            <div class="error-message"><?= htmlspecialchars($error) ?></div>
                 <?php endif; ?>
 
                 <div class="form-group">
@@ -432,7 +487,7 @@ if (isset($_POST['signup'])) {
                     <select name="filiere" id="domain" required>
                         <option value="" disabled selected>- Sélectionnez un filier -</option>
                         <?php foreach ($filieres as $filiere): ?>
-                                <option value="<?= $filiere['id_filiere'] ?>"><?= $filiere['nom_filiere'] ?></option>
+                                    <option value="<?= $filiere['id_filiere'] ?>"><?= $filiere['nom_filiere'] ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -446,108 +501,89 @@ if (isset($_POST['signup'])) {
     <div id="successMessage" class="success-message"></div>
 
     <script>
-    // Enhanced form switching with animations
+        // Enhanced form switching with smooth animations
+        function switchToSignup() {
+            const loginForm = document.getElementById("login-form");
+            const signupForm = document.getElementById("signup-form");
+            const infoContent = document.querySelector(".info-content");
+            const infoSide = document.querySelector(".info-side");
+            
+            // Animate login form out
+            loginForm.classList.remove('active');
+            loginForm.classList.add('hidden');
+            
+            // Change info side content and background
+            infoSide.style.background = "linear-gradient(135deg, #1e40af, #3b82f6)";
+            infoContent.querySelector('h1').textContent = "Demande d'inscription";
+            infoContent.querySelector('p').textContent = "Remplissez ce formulaire pour demander un accès en tant qu'un étudiant.";
+            
+            // Animate signup form in after a short delay
+            setTimeout(() => {
+                signupForm.classList.remove('hidden');
+                signupForm.classList.add('active');
+            }, 300);
+        }
 
-    function switchToSignup() {
-      const loginForm = document.getElementById("login-form");
-      const signupForm = document.getElementById("signup-form");
-      const infoSide = document.querySelector(".info-side");
-       
-      
-      loginForm.classList.add("form-slide-out");
+        function switchToLogin() {
+            const loginForm = document.getElementById("login-form");
+            const signupForm = document.getElementById("signup-form");
+            const infoContent = document.querySelector(".info-content");
+            const infoSide = document.querySelector(".info-side");
+            
+            // Animate signup form out
+            signupForm.classList.remove('active');
+            signupForm.classList.add('hidden');
+            
+            // Change info side content and background
+            infoSide.style.background = "linear-gradient(135deg,rgb(59, 94, 191), #3b82f6)";
+            infoContent.querySelector('h1').textContent = "Welcome, dear student";
+            infoContent.querySelector('p').textContent = "Please log in to access your dashboard, courses, and academic resources. We're glad to have you here.";
+            
+            // Animate login form in after a short delay
+            setTimeout(() => {
+                loginForm.classList.remove('hidden');
+                loginForm.classList.add('active');
+            }, 300);
+        }
 
-      
-      setTimeout(() => {
-        loginForm.style.display = "none";
-        signupForm.style.display = "block";
-        signupForm.classList.add("form-slide-in");
-        
-        infoSide.style.background = "linear-gradient(135deg,rgba(39, 72, 181, 0.78), #3b82f6)";
-        document.querySelector(".info-content h1").textContent = "Demande d'inscription";
-        document.querySelector(".info-content p").textContent = "Remplissez ce formulaire pour demander un accès en tant qu'un etudiant.";
-      }, 400);
-    }
+        // Enhanced success message display
+        function showSuccessMessage(message) {
+            const successMsg = document.getElementById('successMessage');
+            successMsg.textContent = message;
+            successMsg.style.display = 'block';
+            
+            setTimeout(() => {
+                successMsg.style.opacity = '1';
+                
+                setTimeout(() => {
+                    successMsg.style.opacity = '0';
+                    setTimeout(() => {
+                        successMsg.style.display = 'none';
+                    }, 500);
+                }, 2500);
+            }, 100);
+        }
 
-    function switchToLogin() {
-      const loginForm = document.getElementById("login-form");
-      const signupForm = document.getElementById("signup-form");
-      const infoSide = document.querySelector(".info-side");
-      
-      signupForm.classList.add("form-slide-out");
-      
-      setTimeout(() => {
-        signupForm.style.display = "none";
-        loginForm.style.display = "block";
-        loginForm.classList.add("form-slide-in");
-        
-        infoSide.style.background = "linear-gradient(135deg,rgba(39, 72, 181, 0.78), #3b82f6)";
-        document.querySelector(".info-content h1").textContent = "Welcome, dear student";
-        document.querySelector(".info-content p").textContent = "Please log in to access your dashboard, courses, and academic resources. We're glad to have you here.";
-      }, 400);
-    }
+        // Enhanced error message display
+        function showErrorMessage(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            
+            const activeForm = document.querySelector('.login-form.active');
+            if (activeForm) {
+                activeForm.insertBefore(errorDiv, activeForm.firstChild);
+                
+                setTimeout(() => {
+                    errorDiv.style.opacity = '0';
+                    setTimeout(() => {
+                        errorDiv.remove();
+                    }, 500);
+                }, 5000);
+            }
+        }
 
-    // Remove animation classes after they complete
-    document.querySelectorAll('.login-form').forEach(form => {
-      form.addEventListener('animationend', function() {
-        this.classList.remove('form-slide-in', 'form-slide-out');
-      });
-    });
-
-    // Enhanced matieres fetching with loading indicator
-    function fetchMatieres(idFiliere) {
-      if (!idFiliere) return;
-
-      const matiereSelect = document.getElementById('matiere');
-      matiereSelect.innerHTML = '<option value="">Chargement...</option>';
-      matiereSelect.style.display = 'block';
-      
-  
-    }
-
-    // Form input effects
-    document.querySelectorAll('input, select').forEach(element => {
-      // Add focus/blur effects
-      element.addEventListener('focus', function() {
-        this.parentNode.querySelector('label').style.color = '#2563eb';
-      });
-      
-      element.addEventListener('blur', function() {
-        this.parentNode.querySelector('label').style.color = '#475569';
-      });
-      
-      // Add floating label effect on input
-      if (element.tagName === 'INPUT') {
-        element.addEventListener('input', function() {
-          if (this.value) {
-            this.style.backgroundColor = '#ffffff';
-          } else {
-            this.style.backgroundColor = '#f8fafc';
-          }
-        });
-      }
-    });
-
-    // Show success message with animation
-    <?php if (isset($insert_result) && $insert_result): ?>
-                document.addEventListener('DOMContentLoaded', function() {
-                  const messagePanel = document.getElementById('demandeMessage');
-                  messagePanel.style.display = 'block';
-        
-                  setTimeout(function() {
-                    messagePanel.style.opacity = '1';
-          
-                    setTimeout(function() {
-                      messagePanel.style.opacity = '0';
-                      setTimeout(function() {
-                        messagePanel.style.display = 'none';
-                        switchToLogin();
-                      }, 500);
-                    }, 2500);
-                  }, 100);
-                });
-    <?php endif; ?>
-
-         // Set max date for birth date (18 years ago)
+        // Set max date for birth date (18 years ago)
         document.addEventListener('DOMContentLoaded', () => {
             const dateInput = document.getElementById('dat');
             if (dateInput) {
@@ -556,10 +592,26 @@ if (isset($_POST['signup'])) {
                 minDate.setFullYear(today.getFullYear() - 18);
                 dateInput.max = minDate.toISOString().split('T')[0];
             }
+            
+            // Add input focus effects
+            document.querySelectorAll('input, select').forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentNode.style.transform = 'translateY(-2px)';
+                    this.parentNode.style.transition = 'transform 0.2s ease';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentNode.style.transform = 'translateY(0)';
+                });
+            });
         });
-  </script>
 
-
+        <?php if (isset($insert_result) && $insert_result): ?>
+                document.addEventListener('DOMContentLoaded', function() {
+                    showSuccessMessage('Demande d\'inscription envoyée avec succès !');
+                    setTimeout(switchToLogin, 3000);
+                });
+        <?php endif; ?>
+    </script>
 </body>
-
 </html>
