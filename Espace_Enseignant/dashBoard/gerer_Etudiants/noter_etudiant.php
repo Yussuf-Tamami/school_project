@@ -11,7 +11,7 @@ if (!$id_etudiant || !$id_matiere || !$id_enseignant) {
     exit;
 }
 
-$etudiant_stmt = $dba->prepare("SELECT nom, prenom FROM etudiants WHERE id_etudiant = ?");
+$etudiant_stmt = $dba->prepare("SELECT nom, prenom, id_filiere FROM etudiants WHERE id_etudiant = ?");
 $etudiant_stmt->execute([$id_etudiant]);
 $etudiant = $etudiant_stmt->fetch();
 
@@ -25,6 +25,18 @@ $message = "";
 $notes_stmt = $dba->prepare("SELECT num_devoir, note FROM evaluations WHERE id_etudiant = ? AND id_matiere = ?");
 $notes_stmt->execute([$id_etudiant, $id_matiere]);
 $notes = $notes_stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+// Récupération des matières de l'étudiant
+$sql_matieres = "
+    SELECT DISTINCT m.id_matiere, m.nom_matiere
+    FROM etudiants e
+    JOIN filieres f ON e.id_filiere = f.id_filiere
+    JOIN matieres m ON f.id_filiere = m.id_filiere
+    WHERE e.id_etudiant = ?
+";
+$stmt = $dba->prepare($sql_matieres);
+$stmt->execute([$id_etudiant]);
+$matieres = $stmt->fetchAll();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $date = date('Y-m-d');
@@ -52,6 +64,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $notification = "La note du devoir $devoir de la matière $nom_matiere a été ajoutée/modifiée.";
         $notif_stmt = $dba->prepare("INSERT INTO notifications (id_etudiant, message) VALUES (?, ?)");
         $notif_stmt->execute([$id_etudiant, $notification]);
+
+
+        // APRÈS l'enregistrement dyal les 3 notes
+
+// Reprendre les notes de chaque matière
+$somme_moyennes = 0;
+$nombre_matieres_validees = 0;
+foreach ($matieres as $matiere) {
+    $id_m = $matiere['id_matiere'];
+    $stmt = $dba->prepare("SELECT note FROM evaluations WHERE id_etudiant = ? AND id_matiere = ?");
+    $stmt->execute([$id_etudiant, $id_m]);
+    $notes = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    
+    if (count($notes) === 3) {
+        $moy = array_sum($notes) / 3;
+        $somme_moyennes += $moy;
+        $nombre_matieres_validees++;
+    }
+}
+
+$moyenne_generale = ($nombre_matieres_validees > 0)
+    ? round($somme_moyennes / $nombre_matieres_validees, 2)
+    : null;
+
+if ($moyenne_generale !== null) {
+    $adding_moyenne = $dba->prepare('
+        INSERT INTO moyennes_generaux (id_etudiant, id_filiere, moyenne) 
+        VALUES (:id_etudiant, :id_filiere, :moyenne)
+        ON DUPLICATE KEY UPDATE moyenne = :moyenne
+    ');
+    $adding_moyenne->execute([
+        'id_etudiant' => $id_etudiant,
+        'id_filiere' => $etudiant['id_filiere'],
+        'moyenne' => $moyenne_generale
+    ]);
+}
+
 
     } elseif (isset($_POST['delete_devoir'])) {
         $devoir = intval($_POST['delete_devoir']);

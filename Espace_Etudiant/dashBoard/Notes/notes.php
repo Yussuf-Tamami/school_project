@@ -230,22 +230,7 @@ $moyenne_classe = $classe_valide && $etudiants_valides > 0
                     echo "</tr>";
                 }
 
-                $moyenne_generale = ($nombre_matieres_validees == count($matieres) && $nombre_matieres_validees > 0)
-                    ? round($somme_moyennes / $nombre_matieres_validees, 2)
-                    : '';
-
-                if ($moyenne_generale !== '') {
-                    $adding_moyenne = $dba->prepare('
-                        INSERT INTO moyennes_generaux (id_etudiant, id_filiere, moyenne) 
-                        VALUES (:id_etudiant, :id_filiere, :moyenne)
-                        ON DUPLICATE KEY UPDATE moyenne = :moyenne
-                    ');
-                    $adding_moyenne->execute([
-                        'id_etudiant' => $id_etudiant,
-                        'id_filiere' => $id_filiere,
-                        'moyenne' => $moyenne_generale
-                    ]);
-                }
+                
                 ?>
             </tbody>
         </table>
