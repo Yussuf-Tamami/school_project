@@ -230,7 +230,11 @@ $moyenne_classe = $classe_valide && $etudiants_valides > 0
                     echo "</tr>";
                 }
 
-                
+                $moyenne_generale = ($nombre_matieres_validees == count($matieres) && $nombre_matieres_validees > 0)
+                    ? round($somme_moyennes / $nombre_matieres_validees, 2)
+                    : '';
+
+
                 ?>
             </tbody>
         </table>

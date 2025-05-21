@@ -430,7 +430,7 @@ $email_enseignant = $_SESSION['email_enseignant'] ?? 'unknown@unknown.unknown';
             </ul>
             
             <div class="logout-btn">
-                <a href="../../logOut/logOut.php" class="logout-link">
+                <a href="../../../logOut/logOut.php" class="logout-link">
                     <i class="fas fa-sign-out-alt"></i>
                     <span class="nav-text">Déconnexion</span>
                 </a>

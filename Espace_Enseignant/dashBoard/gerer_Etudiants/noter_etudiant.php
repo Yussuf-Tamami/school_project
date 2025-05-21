@@ -94,11 +94,11 @@ if ($moyenne_generale !== null) {
         VALUES (:id_etudiant, :id_filiere, :moyenne)
         ON DUPLICATE KEY UPDATE moyenne = :moyenne
     ');
-    $adding_moyenne->execute([
-        'id_etudiant' => $id_etudiant,
-        'id_filiere' => $etudiant['id_filiere'],
-        'moyenne' => $moyenne_generale
-    ]);
+    $adding_moyenne->bindValue(':id_etudiant', $id_etudiant);
+    $adding_moyenne->bindValue(':id_filiere', $etudiant['id_filiere']);
+    $adding_moyenne->bindValue(':moyenne', $moyenne_generale);
+    $adding_moyenne->bindValue(':moyenne', $moyenne_generale);
+    $adding_moyenne->execute();
 }
 
 
